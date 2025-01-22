@@ -4,6 +4,7 @@
 #include <utility>
 #include <vector>
 
+namespace LinAlgTools {
 template<typename T>
 class Matrix
 {
@@ -67,7 +68,7 @@ public:
                 return res;
         }
 
-        Matrix<T> Transpose()
+        Matrix<T>& Transpose()
         {
                 Matrix<T> res(Columns(), Rows());
 
@@ -77,7 +78,9 @@ public:
                         }
                 }
 
-                return res;
+                *this = res;
+
+                return *this;
         }
 
         //operators
@@ -91,21 +94,19 @@ public:
                 return data_[row_id * cols_ + col_id];
         }
 
-        Matrix<T>& operator=(const Matrix& rhs)
-        {
-                std::size_t rows = rhs.Rows();
-                std::size_t cols = rhs.Columns();
-
-                assert(rows == Rows() && cols == Columns() && "sizes are different");
-
-                for (std::size_t i = 0; i < Rows(); i++) {
-                        for (std::size_t j = 0; j < Columns(); j++) {
-                                (*this)(i, j) = rhs(i, j);
-                        }
-                }
-
-                return *this;
-        }
+        Matrix<T>& operator=(const Matrix& rhs) = default;
+                // std::size_t rows = rhs.Rows();
+                // std::size_t cols = rhs.Columns();
+                //
+                // assert(rows == Rows() && cols == Columns() && "sizes are different");
+                //
+                // for (std::size_t i = 0; i < Rows(); i++) {
+                //         for (std::size_t j = 0; j < Columns(); j++) {
+                //                 (*this)(i, j) = rhs(i, j);
+                //         }
+                // }
+                //
+                // return *this;
 
         Matrix<T> operator+(Matrix& rhs)
         {
@@ -286,3 +287,4 @@ private:
         std::size_t cols_;
         std::vector<T> data_;
 };
+} //namespace LinAlgTools
