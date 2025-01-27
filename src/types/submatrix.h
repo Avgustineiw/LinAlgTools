@@ -13,7 +13,7 @@ class SubMatrix
 {
 public:
         //Constuctors
-        SubMatrix(Matrix<T> &matrix, Slice rows, Slice cols)
+        SubMatrix(Matrix<T>& matrix, Slice rows, Slice cols)
         {
                 assert(rows.begin > -1 && rows.end < matrix.Rows() &&
                        cols.begin > -1 && cols.end < matrix.Columns() &&
@@ -22,12 +22,12 @@ public:
                 cols_ = cols.end - cols.begin + 1;
 
                 for (std::size_t i = rows.begin; i <= rows.end; i++) {
-                        for (size_t j = cols.begin; j <= cols.end; j++) {
+                        for (std::size_t j = cols.begin; j <= cols.end; j++) {
                                 data_.push_back(matrix(i, j));
                         }
                 }
         }
-        
+
         //Methods
         std::size_t Rows() const
         {
@@ -49,7 +49,7 @@ public:
         {
                 return data_[row_id * cols_ + col_id];
         }
-        
+
         friend std::ostream& operator<<(std::ostream& os, const SubMatrix& matrix)
         {
                 for (std::size_t i = 0; i < matrix.Rows(); i++) {
@@ -71,9 +71,10 @@ public:
 
                 return os;
         }
+
 private:
         Matrix<T>* ptr_;
         std::size_t cols_;
         std::vector<T> data_;
 };
-} //typename LinAlgTools;
+}// namespace LinAlgTools

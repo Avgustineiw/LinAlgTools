@@ -1,12 +1,14 @@
 #pragma once
 
 #include <cassert>
+#include <functional>
 #include <initializer_list>
 #include <iostream>
 #include <utility>
 #include <vector>
 
-namespace LinAlgTools {
+namespace LinAlgTools
+{
 template<typename T>
 class Matrix
 {
@@ -85,6 +87,26 @@ public:
                 return *this;
         }
 
+        Matrix<T>& Elementwise(std::function<void(T&)> func)
+        {
+                for (std::size_t i = 0; i < Rows(); i++) {
+                        for (std::size_t j = 0; j < Columns(); j++) {
+                                func((*this)(i, j));
+                        }
+                }
+
+                return *this;
+        }
+
+        T GetNorm()
+        {
+                assert(Rows() == 1 || Columns() == 1 && "Incorrect size");
+
+                T res = T{0};
+                Elementwise([&](T& value) { res += value; });
+                return res;
+        }
+
         //operators
         T operator()(const std::size_t row_id, const std::size_t col_id) const
         {
@@ -97,18 +119,18 @@ public:
         }
 
         Matrix<T>& operator=(const Matrix& rhs) = default;
-                // std::size_t rows = rhs.Rows();
-                // std::size_t cols = rhs.Columns();
-                //
-                // assert(rows == Rows() && cols == Columns() && "sizes are different");
-                //
-                // for (std::size_t i = 0; i < Rows(); i++) {
-                //         for (std::size_t j = 0; j < Columns(); j++) {
-                //                 (*this)(i, j) = rhs(i, j);
-                //         }
-                // }
-                //
-                // return *this;
+        // std::size_t rows = rhs.Rows();
+        // std::size_t cols = rhs.Columns();
+        //
+        // assert(rows == Rows() && cols == Columns() && "sizes are different");
+        //
+        // for (std::size_t i = 0; i < Rows(); i++) {
+        //         for (std::size_t j = 0; j < Columns(); j++) {
+        //                 (*this)(i, j) = rhs(i, j);
+        //         }
+        // }
+        //
+        // return *this;
 
         Matrix<T> operator+(Matrix& rhs)
         {
@@ -289,4 +311,4 @@ private:
         std::size_t cols_;
         std::vector<T> data_;
 };
-} //namespace LinAlgTools
+}//namespace LinAlgTools
