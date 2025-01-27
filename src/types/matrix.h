@@ -7,8 +7,7 @@
 #include <utility>
 #include <vector>
 
-namespace LinAlgTools
-{
+namespace LinAlgTools {
 template<typename T>
 class Matrix
 {
@@ -105,6 +104,15 @@ public:
                 T res = T{0};
                 Elementwise([&](T& value) { res += value; });
                 return res;
+        }
+
+        Matrix<T>& Normalize()
+        {
+                T norm = GetNorm();
+
+                *this = *this / norm;
+
+                return *this;
         }
 
         //operators
