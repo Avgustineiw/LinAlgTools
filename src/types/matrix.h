@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cassert>
+#include <cstdint>
 #include <functional>
 #include <initializer_list>
 #include <iostream>
@@ -9,49 +10,38 @@
 
 namespace LinAlgTools {
 template<typename T>
-class Matrix
-{
+class Matrix {
+        using Index = uint64_t;
+
 public:
-        //constructors
-        Matrix(const Matrix& rhs) = default;
-
-        Matrix(std::size_t rows, std::size_t cols, T value = T{0})
-        {
-                cols_ = cols;
-
-                data_.resize(rows * cols, value);
+        Matrix(Index rows, Index cols, T value = T{0}) : cols_(cols), data_(rows * cols, value)
+        {//нужно ли тут мувать cols и rows?
+                assert(rows > 0 || cols > 0 && "Rows and columns must be positive integers");
         }
 
-        Matrix(std::initializer_list<std::initializer_list<T>> list)
+        Matrix(std::initializer_list<std::initializer_list<T>> list) : cols_(list.begin()->size())//код не падает, если список пустой
         {
-                cols_ = list.begin()->size();
-                data_.reserve(Columns() * list.size());
-
                 for (auto sublist: list) {
-                        for (auto ele: sublist) {
-                                data_.push_back(ele);
-                        }
+                        assert(sublist.size() == cols_ && "Rows have different sizes");
+                        data_.insert(data_.end(), sublist);
                 }
-        };
+        }
 
-        //Methods
-        std::size_t Rows() const
+        Index Rows() const
         {
                 return data_.size() / cols_;
         }
 
-        std::size_t Columns() const
+        Index Columns() const
         {
                 return cols_;
         }
 
-        Matrix<T> Diagonal() const
+        Matrix Diagonal() const
         {
-                const std::size_t size = std::min(Rows(), Columns());
-
+                const Index size = std::min(Rows(), Columns());
                 Matrix<T> res(size, 1);
-
-                for (std::size_t i = 0; i < size; i++) {
+                for (Index i = 0; i < size; i++) {
                         res(i, 0) = (*this)(i, i);
                 }
 
@@ -61,93 +51,87 @@ public:
         T Trace() const
         {
                 T res = 0;
-
-                const std::size_t size = std::min(Rows(), Columns());
-
-                for (std::size_t i = 0; i < size; i++) {
+                const Index size = std::min(Rows(), Columns());
+                for (Index i = 0; i < size; i++) {
                         res += (*this)(i, i);
                 }
 
                 return res;
         }
 
-        Matrix<T>& Transpose()
+        Matrix& Transpose()
         {
                 Matrix<T> res(Columns(), Rows());
-
-                for (std::size_t i = 0; i < Rows(); i++) {
-                        for (std::size_t j = 0; j < Columns(); j++) {
+                for (Index i = 0; i < Rows(); i++) {
+                        for (Index j = 0; j < Columns(); j++) {
                                 res(j, i) = (*this)(i, j);
                         }
                 }
-
-                *this = res;
+                *this = std::move(res);
 
                 return *this;
         }
 
-        Matrix<T>& Elementwise(std::function<void(T&)> func)
+        template<class Function>
+        Matrix& Elementwise(Function f)
         {
-                for (std::size_t i = 0; i < Rows(); i++) {
-                        for (std::size_t j = 0; j < Columns(); j++) {
-                                func((*this)(i, j));
-                        }
+                for (auto& element: data_) {
+                        f(element);
                 }
 
                 return *this;
         }
 
-        T GetNorm()
-        {
-                assert(Rows() == 1 || Columns() == 1 && "Incorrect size");
+        template<class Function>
+        const Matrix& Elementwise(Function f) const
+        {//void или const Matrix&?
+                for (auto& element: data_) {
+                        f(element);
+                }
 
-                T res = T{0};
-                Elementwise([&](T& value) { res += value; });
-                return res;
+                return *this;
         }
 
-        Matrix<T>& Normalize()
+        T GetNorm() const
+        {
+                assert(Rows() == 1 || Columns() == 1 && "Incorrect size for vector norm");
+
+                T res = T{0};
+                Elementwise([&res](const T& value) {
+                        res += value * value;
+                });
+
+                return std::sqrt(res);
+        }
+
+        Matrix& Normalize()
         {
                 T norm = GetNorm();
-
-                *this = *this / norm;
+                if (norm != 0) {
+                        *this = *this / norm;
+                }
 
                 return *this;
         }
 
         //operators
-        T operator()(const std::size_t row_id, const std::size_t col_id) const
+        T operator()(const Index row_id, const Index col_id) const
         {
                 return data_[row_id * cols_ + col_id];
         }
 
-        T& operator()(const std::size_t row_id, const std::size_t col_id)
+        T& operator()(const Index row_id, const Index col_id)
         {
                 return data_[row_id * cols_ + col_id];
         }
 
-        Matrix<T>& operator=(const Matrix& rhs) = default;
-        // std::size_t rows = rhs.Rows();
-        // std::size_t cols = rhs.Columns();
-        //
-        // assert(rows == Rows() && cols == Columns() && "sizes are different");
-        //
-        // for (std::size_t i = 0; i < Rows(); i++) {
-        //         for (std::size_t j = 0; j < Columns(); j++) {
-        //                 (*this)(i, j) = rhs(i, j);
-        //         }
-        // }
-        //
-        // return *this;
-
-        Matrix<T> operator+(Matrix& rhs)
+        Matrix operator+(const Matrix& rhs) const
         {
-                assert(Rows() == rhs.Rows() && rhs.Columns() && "Matrices must be of the same size");
+                assert(Rows() == rhs.Rows() && Columns() == rhs.Columns() && "Matrices must be of the same size");
 
                 Matrix<T> res(Rows(), Columns());
-
-                for (std::size_t i = 0; i < Rows(); i++) {
-                        for (std::size_t j = 0; j < Columns(); j++) {
+                for (Index i = 0; i < Rows(); i++) {
+                        for (Index j = 0; j < Columns(); j++) {
                                 res(i, j) = (*this)(i, j) + rhs(i, j);
                         }
                 }
@@ -155,27 +139,24 @@ public:
                 return res;
         }
 
-        Matrix<T>& operator+=(Matrix& rhs)
+        Matrix& operator+=(Matrix& rhs)
         {
-                assert(Rows() == rhs.Rows() && rhs.Columns() && "Matrices must be of the same size");
+                assert(Rows() == rhs.Rows() && Columns() == rhs.Columns() && "Matrices must be of the same size");
 
-                for (std::size_t i = 0; i < Rows(); i++) {
-                        for (std::size_t j = 0; j < Columns(); j++) {
-                                (*this)(i, j) += rhs(i, j);
-                        }
+                for (Index i = 0; i < data_.size(); i++) {
+                        data_[i] += rhs.data_[i];
                 }
 
                 return *this;
         }
 
-        Matrix<T> operator-(Matrix& rhs)
+        Matrix operator-(Matrix& rhs)
         {
-                assert(Rows() == rhs.Rows() && rhs.Columns() && "Matrices must be of the same size");
+                assert(Rows() == rhs.Rows() && Columns() == rhs.Columns() && "Matrices must be of the same size");
 
                 Matrix<T> res(Rows(), Columns());
-
-                for (std::size_t i = 0; i < Rows(); i++) {
-                        for (std::size_t j = 0; j < Columns(); j++) {
+                for (Index i = 0; i < Rows(); i++) {
+                        for (Index j = 0; j < Columns(); j++) {
                                 res(i, j) = (*this)(i, j) - rhs(i, j);
                         }
                 }
@@ -183,28 +164,25 @@ public:
                 return res;
         }
 
-        Matrix<T>& operator-=(Matrix& rhs)
+        Matrix& operator-=(Matrix& rhs)
         {
-                assert(Rows() == rhs.Rows() && rhs.Columns() && "Matrices must be of the same size");
+                assert(Rows() == rhs.Rows() && Columns() == rhs.Columns() && "Matrices must be of the same size");
 
-                for (std::size_t i = 0; i < Rows(); i++) {
-                        for (std::size_t j = 0; j < Columns(); j++) {
-                                (*this)(i, j) -= rhs(i, j);
-                        }
+                for (Index i = 0; i < data_.size(); i++) {
+                        data_[i] -= rhs.data_[i];
                 }
 
                 return *this;
         }
 
-        Matrix<T> operator*(Matrix& rhs)
+        Matrix operator*(Matrix& rhs)
         {
                 assert(Rows() == rhs.Columns() && "Number of rows of the left matrix must equal the number of columns of the right matrix");
 
                 Matrix<T> res(Rows(), rhs.Columns());
-
-                for (std::size_t i = 0; i < Rows(); i++) {
-                        for (std::size_t j = 0; j < rhs.Columns(); j++) {
-                                for (std::size_t k = 0; k < Columns(); k++) {
+                for (Index i = 0; i < Rows(); i++) {
+                        for (Index j = 0; j < rhs.Columns(); j++) {
+                                for (Index k = 0; k < Columns(); k++) {
                                         res(i, j) += (*this)(i, k) * rhs(k, j);
                                 }
                         }
@@ -213,12 +191,11 @@ public:
                 return res;
         }
 
-        Matrix<T> operator*(const T scalar)
+        Matrix operator*(const T scalar)
         {
                 Matrix<T> res(Rows(), Columns());
-
-                for (std::size_t i = 0; i < Rows(); i++) {
-                        for (std::size_t j = 0; j < Columns(); j++) {
+                for (Index i = 0; i < Rows(); i++) {
+                        for (Index j = 0; j < Columns(); j++) {
                                 res(i, j) = (*this)(i, j) * scalar;
                         }
                 }
@@ -226,23 +203,20 @@ public:
                 return res;
         }
 
-        Matrix<T>& operator*=(T scalar)
+        Matrix& operator*=(T scalar)
         {
-                for (std::size_t i = 0; i < Rows(); i++) {
-                        for (std::size_t j = 0; j < Columns(); j++) {
-                                (*this)(i, j) *= scalar;
-                        }
+                for (Index i = 0; i < data_.size(); i++) {
+                        data_[i] *= scalar;
                 }
 
                 return *this;
         }
 
-        Matrix<T> operator/(const T scalar)
+        Matrix operator/(const T scalar)
         {
                 Matrix<T> res(Rows(), Columns());
-
-                for (std::size_t i = 0; i < Rows(); i++) {
-                        for (std::size_t j = 0; j < Columns(); j++) {
+                for (Index i = 0; i < Rows(); i++) {
+                        for (Index j = 0; j < Columns(); j++) {
                                 res(i, j) = (*this)(i, j) / scalar;
                         }
                 }
@@ -250,30 +224,18 @@ public:
                 return res;
         }
 
-        Matrix<T>& operator/=(T scalar)
+        Matrix& operator/=(T scalar)
         {
-                for (std::size_t i = 0; i < Rows(); i++) {
-                        for (std::size_t j = 0; j < Columns(); j++) {
-                                (*this)(i, j) /= scalar;
-                        }
+                for (Index i = 0; i < data_.size(); i++) {
+                        data_[i] /= scalar;
                 }
 
                 return *this;
         }
 
-        bool operator==(const Matrix& rhs)
+        friend bool operator==(const Matrix& lhs, const Matrix& rhs)
         {
-                assert(Rows() == rhs.Rows() && rhs.Columns() && "Matrices must be of the same size");
-
-                for (std::size_t i = 0; i < Rows(); i++) {
-                        for (std::size_t j = 0; j < Columns(); j++) {
-                                if ((*this)(i, j) != rhs(i, j)) {
-                                        return false;
-                                }
-                        }
-                }
-
-                return true;
+                return lhs.cols_ == rhs.cols_ && lhs.data_ == rhs.data_;
         }
 
         bool operator!=(const Matrix& rhs)
@@ -283,17 +245,14 @@ public:
 
         friend std::ostream& operator<<(std::ostream& os, const Matrix& matrix)
         {
-                for (std::size_t i = 0; i < matrix.Rows(); i++) {
+                for (Index i = 0; i < matrix.Rows(); i++) {
                         os << '[';
-
-                        for (std::size_t j = 0; j < matrix.Columns(); j++) {
+                        for (Index j = 0; j < matrix.Columns(); j++) {
                                 os << matrix(i, j);
-
                                 if (j + 1 < matrix.Columns()) {
                                         os << ", ";
                                 }
                         }
-
                         os << ']';
                         if (i + 1 < matrix.Rows()) {
                                 os << '\n';
@@ -305,8 +264,8 @@ public:
 
         friend std::istream& operator>>(std::istream& is, Matrix& matrix)
         {
-                for (std::size_t i = 0; i < matrix.Rows(); i++) {
-                        for (std::size_t j = 0; j < matrix.Columns(); j++) {
+                for (Index i = 0; i < matrix.Rows(); i++) {
+                        for (Index j = 0; j < matrix.Columns(); j++) {
                                 is >> matrix(i, j);
                         }
                 }
@@ -316,7 +275,7 @@ public:
 
 
 private:
-        std::size_t cols_;
+        Index cols_;
         std::vector<T> data_;
 };
 }//namespace LinAlgTools
