@@ -5,14 +5,14 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
+#include <regex>
 #include <vector>
 
 namespace LinAlgTools {
 template<typename T>
 class SubMatrix {
-        using Index = uint64_t;
+        using Index = int64_t;
 
-private:
         struct RowSlice
         {
                 Index begin = -1;
@@ -25,37 +25,32 @@ private:
         };
 
 public:
-        SubMatrix(Matrix<T>& matrix, RowSlice rows, ColumnSlice cols): pmatrix_(&matrix), rows_({rows.begin, rows.end}), cols_({cols.begin, cols.end})
-        {
-                // assert(rows_.begin > -1 && rows_.end < matrix.Rows() &&
-                //        cols_.begin > -1 && cols_.end < matrix.Columns() &&
-                //        "Slice must be inside the matrix");
+        SubMatrix(Matrix<T>& matrix, RowSlice rows, ColumnSlice cols)
+            : pmatrix_(&matrix), rows_({rows.begin, rows.end}), cols_({cols.begin, cols.end}) {
+                assert(rows.begin > -1 && rows.end < matrix.Rows() &&
+                       cols.begin > -1 && cols.end < matrix.Columns() &&
+                       "Slice must be inside the matrix");
         }
 
-        Index Rows() const
-        {
+        Index Rows() const {
                 return rows_.end - rows_.begin + 1;
         }
 
-        Index Columns() const
-        {
+        Index Columns() const {
                 return cols_.end - cols_.begin + 1;
         }
 
-        T operator()(Index row, Index col) const
-        {
+        T operator()(Index row, Index col) const {
                 assert(pmatrix_ != nullptr && "Pointer is null");
                 return (*pmatrix_)(rows_.begin + row, cols_.begin + col);
         }
 
-        T& operator()(const std::size_t row, const std::size_t col)
-        {
+        T& operator()(const std::size_t row, const std::size_t col) {
                 assert(pmatrix_ != nullptr && "Pointer is null");
                 return (*pmatrix_)(rows_.begin + row, cols_.begin + col);
         }
 
-        friend std::ostream& operator<<(std::ostream& os, const SubMatrix& matrix)
-        {
+        friend std::ostream& operator<<(std::ostream& os, const SubMatrix& matrix) {
                 for (std::size_t i = 0; i < matrix.Rows(); i++) {
                         os << '[';
                         for (std::size_t j = 0; j < matrix.Columns(); j++) {

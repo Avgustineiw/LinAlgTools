@@ -278,6 +278,7 @@ TSWLatexianTemp*
 # Old material
 Lectures_old/
 Figures_old/
+build/
 
 # Some plotting python code
 Plotting/
