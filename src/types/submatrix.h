@@ -5,8 +5,6 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
-#include <regex>
-#include <vector>
 
 namespace LinAlgTools {
 template<typename T>

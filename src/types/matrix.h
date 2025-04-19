@@ -2,7 +2,6 @@
 
 #include <cassert>
 #include <cstdint>
-#include <functional>
 #include <initializer_list>
 #include <iostream>
 #include <utility>
@@ -24,6 +23,17 @@ public:
                         data_.insert(data_.end(), sublist);
                 }
         }
+        
+        // При добавлении этого конструктора падает весь код. Компилятор жалуется на незакрытую
+        // скобку в submatrix.h, но я не думаю, что это основная проблема. Пока не понимаю причину
+        // проблемы.
+        // Matrix(SubMatrix<T> &rhs): Matrix(rhs.Rows(), rhs.Columns()) {
+        //         for (Index i = 0; i < Rows(); i++) {
+        //                 for (Index j = 0; j < Columns(); j++) {
+        //                         (*this)(i, j) = rhs(i, j);
+        //                 }
+        //         }
+        // }
 
         Index Rows() const {
                 return data_.size() / cols_;
@@ -60,6 +70,16 @@ public:
                 }
                 *this = std::move(result);
                 return *this;
+        }
+
+        Matrix Transposed() {
+                Matrix<T> result(Columns(), Rows());
+                for (Index i = 0; i < Rows(); i++) {
+                        for (Index j = 0; j < Columns(); j++) {
+                                result(j, i) = (*this)(i, j);
+                        }
+                }
+                return result;
         }
 
         template<class Function>
