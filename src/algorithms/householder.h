@@ -6,6 +6,8 @@
 #include <cstdint>
 #include <utility>
 
+
+//Мусорный код, который не стоит читать. Пока что скопирован из псевдокода книги Голубя, дальше буду пытаться привести к нормальному виду.
 namespace LinAlgTools::Algorithm {
 using Index = int64_t;
 
@@ -48,19 +50,20 @@ std::pair<Matrix<double>, double> HouseholderReduction(SubMatrix<double>& x) {
         return {v, beta};
 }
 
-// void QR_Householder(Matrix<double>& matrix) {
-//         for (Index col = 0; col < std::min(matrix.Rows(), matrix.Columns()); col++) {
-//                 LinAlgTools::SubMatrix<double> vec = {matrix, {col, matrix.Rows() - 1}, {col, col}};
-//                 LinAlgTools::SubMatrix<double> subMatrix = {matrix, {col, matrix.Rows() - 1}, {col, matrix.Columns() - 1}};
-//
-//                 auto res = LinAlgTools::Algorithm::HouseholderReduction(vec);
-//                 auto v = res.first;
-//                 auto beta = res.second;
-//
-//                 auto v_transposed = v.Transposed();
-//                 auto outer_product = v * v_transposed;
-//
-//                 auto matrix_res = subMatrix - (beta * v) * (v_transposed * subMatrix);
-//         }
-// }
+void QR_Householder(Matrix<double>& matrix) {
+        for (Index col = 0; col < std::min(matrix.Rows(), matrix.Columns()); col++) {
+                LinAlgTools::SubMatrix<double> vec = {matrix, {col, matrix.Rows() - 1}, {col, col}};
+                LinAlgTools::SubMatrix<double> subMatrix = {matrix, {col, matrix.Rows() - 1}, {col, matrix.Columns() - 1}};
+
+                auto res = LinAlgTools::Algorithm::HouseholderReduction(vec);
+                auto v = res.first;
+                auto beta = res.second;
+
+                auto v_transposed = v.Transposed();
+                auto outer_product = v * v_transposed;
+
+                auto matrix_res = subMatrix - (beta * v) * (v_transposed * subMatrix);
+                std::cout << matrix_res;
+        }
+}
 }// namespace LinAlgTools::Algorithm

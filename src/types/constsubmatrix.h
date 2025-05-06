@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../helpers/index.h"
 
 #include <cassert>
 #include <cstddef>
@@ -12,7 +13,7 @@ template<typename T> class SubMatrix;
 
 template<typename T>
 class ConstSubMatrix {
-        using Index = int64_t;
+        using Index = Helpers::Types::Index;
 
         struct RowSlice
         {
@@ -26,6 +27,8 @@ class ConstSubMatrix {
         };
 
 public:
+        using ElementType = T;
+
         ConstSubMatrix(const Matrix<T>& matrix, RowSlice rows, ColumnSlice cols)
             : pmatrix_(&matrix), rows_({rows.begin, rows.end}), cols_({cols.begin, cols.end}) {
                 assert(rows.begin > -1 && rows.end < matrix.Rows() &&
