@@ -4,10 +4,16 @@
 #include <cstdint>
 #include <initializer_list>
 #include <iostream>
+#include <ostream>
 #include <utility>
 #include <vector>
 
 namespace LinAlgTools {
+template<typename T>
+class SubMatrix;
+template<typename T>
+class ConstSubMatrix;
+
 template<typename T>
 class Matrix {
         using Index = int64_t;
@@ -23,17 +29,16 @@ public:
                         data_.insert(data_.end(), sublist);
                 }
         }
-        
-        // При добавлении этого конструктора падает весь код. Компилятор жалуется на незакрытую
-        // скобку в submatrix.h, но я не думаю, что это основная проблема. Пока не понимаю причину
-        // проблемы.
-        // Matrix(SubMatrix<T> &rhs): Matrix(rhs.Rows(), rhs.Columns()) {
-        //         for (Index i = 0; i < Rows(); i++) {
-        //                 for (Index j = 0; j < Columns(); j++) {
-        //                         (*this)(i, j) = rhs(i, j);
-        //                 }
-        //         }
-        // }
+
+        Matrix(const ConstSubMatrix<T>& rhs) : Matrix(rhs.Rows(), rhs.Columns()) {
+                for (Index i = 0; i < Rows(); i++) {
+                        for (Index j = 0; j < Columns(); j++) {
+                                (*this)(i, j) = rhs(i, j);
+                        }
+                }
+        }
+
+        Matrix(const SubMatrix<T>& rhs) : Matrix(rhs.ToConst()) {};
 
         Index Rows() const {
                 return data_.size() / cols_;

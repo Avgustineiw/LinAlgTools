@@ -49,18 +49,18 @@ std::pair<Matrix<double>, double> HouseholderReduction(SubMatrix<double>& x) {
 }
 
 // void QR_Householder(Matrix<double>& matrix) {
-        // for (Index col = 0; col < std::min(matrix.Rows(), matrix.Columns()); col++) {
-        //         LinAlgTools::SubMatrix<double> vec = {matrix, {col, matrix.Rows() - 1}, {col, col}};
-        //         LinAlgTools::SubMatrix<double> subMatrix = {matrix, {col, matrix.Rows() - 1}, {col, matrix.Columns() - 1}};
-        //
-        //         auto res = LinAlgTools::Algorithm::HouseholderReduction(vec);
-        //         auto v = res.first;
-        //         auto beta = res.second;
-        //
-        //         auto v_transposed = v.Transposed();
-        //         auto outer_product = v * v_transposed;
-        //
-                // auto matrix_res = subMatrix - (beta * v) * (v_transposed * subMatrix);
-        // }
+//         for (Index col = 0; col < std::min(matrix.Rows(), matrix.Columns()); col++) {
+//                 LinAlgTools::SubMatrix<double> vec = {matrix, {col, matrix.Rows() - 1}, {col, col}};
+//                 LinAlgTools::SubMatrix<double> subMatrix = {matrix, {col, matrix.Rows() - 1}, {col, matrix.Columns() - 1}};
+//
+//                 auto res = LinAlgTools::Algorithm::HouseholderReduction(vec);
+//                 auto v = res.first;
+//                 auto beta = res.second;
+//
+//                 auto v_transposed = v.Transposed();
+//                 auto outer_product = v * v_transposed;
+//
+//                 auto matrix_res = subMatrix - (beta * v) * (v_transposed * subMatrix);
+//         }
 // }
 }// namespace LinAlgTools::Algorithm

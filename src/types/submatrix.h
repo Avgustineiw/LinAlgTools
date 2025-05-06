@@ -1,12 +1,16 @@
 #pragma once
 
-#include "matrix.h"
-
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
+#include <ostream>
 
 namespace LinAlgTools {
+template<typename T>
+class Matrix;
+template<typename T>
+class ConstSubMatrix;
+
 template<typename T>
 class SubMatrix {
         using Index = int64_t;
@@ -46,6 +50,11 @@ public:
         T& operator()(const std::size_t row, const std::size_t col) {
                 assert(pmatrix_ != nullptr && "Pointer is null");
                 return (*pmatrix_)(rows_.begin + row, cols_.begin + col);
+        }
+
+        ConstSubMatrix<T> ToConst() const {
+                return ConstSubMatrix<T>(*pmatrix_, {rows_.begin, rows_.end},
+                                                    {cols_.begin, cols_.end});
         }
 
         friend std::ostream& operator<<(std::ostream& os, const SubMatrix& matrix) {
