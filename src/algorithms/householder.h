@@ -62,8 +62,8 @@ void QR_Householder(Matrix<double>& matrix) {
                 auto v_transposed = v.Transposed();
                 auto outer_product = v * v_transposed;
 
-                auto matrix_res = subMatrix - (beta * v) * (v_transposed * subMatrix);
-                std::cout << matrix_res;
+                subMatrix -= (beta * v) * (v_transposed * subMatrix);
+                std::cout << matrix << "\n\n";
         }
 }
 }// namespace LinAlgTools::Algorithm

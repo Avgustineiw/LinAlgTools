@@ -22,7 +22,7 @@ class Matrix {
         using Index = Helpers::Types::Index;
 
 public:
-        using ElementType = T;
+        using ElementType = std::remove_cv_t<T>;
 
         Matrix(Index rows, Index cols, T value = T{0}) : cols_(cols), data_(rows * cols, value) {
                 assert(rows > 0 && cols > 0 &&
@@ -31,7 +31,7 @@ public:
 
         Matrix(std::initializer_list<std::initializer_list<T>> list) : cols_(list.begin()->size()) {
                 for (auto sublist: list) {
-                        assert(sublist.size() == cols_ && 
+                        assert(sublist.size() == cols_ &&
                                "Size of rows must be equal to the number of columns.");
                         data_.insert(data_.end(), sublist);
                 }
@@ -46,6 +46,20 @@ public:
         }
 
         Matrix(const SubMatrix<T>& rhs) : Matrix(rhs.ToConst()) {};
+
+        Matrix(const Matrix& rhs) = default;
+
+        Matrix(Matrix&& rhs) noexcept
+            : cols_(std::exchange(rhs.cols_, 0)), data_(std::move(rhs.data_)) {
+        }
+
+        Matrix& operator=(const Matrix& rhs) = default;
+
+        Matrix& operator=(Matrix&& rhs) noexcept {
+                cols_ = std::exchange(rhs.cols_, 0);
+                data_ = std::move(rhs.data_);
+                return *this;
+        }
 
         Index Rows() const {
                 return data_.size() / cols_;
@@ -111,8 +125,8 @@ public:
         }
 
         T GetNorm() const {
-                assert(Rows() == 1 || Columns() == 1 && 
-                       "Incorrect size for vector norm");
+                assert(Rows() == 1 || Columns() == 1 &&
+                                              "Incorrect size for vector norm");
 
                 T res = T{0};
                 Elementwise([&res](const T& value) {
@@ -204,7 +218,7 @@ template<Helpers::MatrixType F, Helpers::MatrixType S>
 Matrix<typename F::ElementType> operator-(const F& lhs, const S& rhs) {
         using T = typename F::ElementType;
 
-        assert(lhs.Rows() == rhs.Rows() && lhs.Columns() == rhs.Columns() && 
+        assert(lhs.Rows() == rhs.Rows() && lhs.Columns() == rhs.Columns() &&
                "Matrices must have the same size for subtraction.");
 
         Matrix<T> result = lhs;
@@ -235,7 +249,7 @@ template<Helpers::MatrixType F, Helpers::MatrixType S>
 Matrix<typename F::ElementType> operator*(const F& lhs, const S& rhs) {
         using T = typename F::ElementType;
 
-        assert(lhs.Columns() == rhs.Rows()  && 
+        assert(lhs.Columns() == rhs.Rows() &&
                "Number of columns of the left matrix must equal the number of rows of the right matrix.");
 
         Matrix<T> result(lhs.Rows(), rhs.Columns());

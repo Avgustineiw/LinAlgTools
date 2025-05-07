@@ -29,14 +29,29 @@ class SubMatrix {
         };
 
 public:
-        using ElementType = T;
-
+        using ElementType = std::remove_cv_t<T>;
 
         SubMatrix(Matrix<T>& matrix, RowSlice rows, ColumnSlice cols)
             : pmatrix_(&matrix), rows_({rows.begin, rows.end}), cols_({cols.begin, cols.end}) {
                 assert(rows.begin > -1 && rows.end < matrix.Rows() &&
                        cols.begin > -1 && cols.end < matrix.Columns() &&
                        "Slice must be inside the matrix");
+        }
+
+        SubMatrix(const SubMatrix& rhs) = default;
+
+        SubMatrix(SubMatrix&& rhs) noexcept
+            : pmatrix_(std::exchange(rhs.pmatrix_, nullptr)),
+              rows_(std::exchange(rhs.rows_, {0, 1})),
+              cols_(std::exchange(rhs.cols_, {0, 1})) {};
+
+        SubMatrix& operator=(const SubMatrix& lhs) = default;
+
+        SubMatrix& operator=(SubMatrix&& rhs) noexcept {
+                pmatrix_ = std::exchange(rhs.pmatrix_, nullptr);
+                rows_ = std::exchange(rhs.rows_, {0, 1});
+                cols_ = std::exchange(rhs.cols_, {0, 1});
+                return *this;
         }
 
         Index Rows() const {
@@ -52,20 +67,20 @@ public:
                 return (*pmatrix_)(rows_.begin + row, cols_.begin + col);
         }
 
-        T& operator()(const std::size_t row, const std::size_t col) {
+        T& operator()(const Index row, const Index col) {
                 assert(pmatrix_ != nullptr && "Pointer is null");
                 return (*pmatrix_)(rows_.begin + row, cols_.begin + col);
         }
 
         ConstSubMatrix<T> ToConst() const {
                 return ConstSubMatrix<T>(*pmatrix_, {rows_.begin, rows_.end},
-                                                    {cols_.begin, cols_.end});
+                                         {cols_.begin, cols_.end});
         }
 
         friend std::ostream& operator<<(std::ostream& os, const SubMatrix& matrix) {
-                for (std::size_t i = 0; i < matrix.Rows(); i++) {
+                for (Index i = 0; i < matrix.Rows(); i++) {
                         os << '[';
-                        for (std::size_t j = 0; j < matrix.Columns(); j++) {
+                        for (Index j = 0; j < matrix.Columns(); j++) {
                                 os << matrix(i, j);
                                 if (j + 1 < matrix.Columns()) {
                                         os << ", ";
