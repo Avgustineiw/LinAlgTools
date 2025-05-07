@@ -1,10 +1,9 @@
 #pragma once
 
-#include "../helpers/index.h"
 #include "../helpers/matrix_type.h"
+#include "../helpers/types.h"
 
 #include <cassert>
-#include <cstdint>
 #include <initializer_list>
 #include <iostream>
 #include <ostream>
@@ -13,25 +12,22 @@
 
 namespace LinAlgTools {
 template<typename T>
-class SubMatrix;
-template<typename T>
-class ConstSubMatrix;
-
-template<typename T>
 class Matrix {
         using Index = Helpers::Types::Index;
 
 public:
         using ElementType = std::remove_cv_t<T>;
 
-        Matrix(Index rows, Index cols, T value = T{0}) : cols_(cols), data_(rows * cols, value) {
-                assert(rows > 0 && cols > 0 &&
+        explicit Matrix(Index size) : columns_(size), data_(size * size, T{0}) {};
+
+        Matrix(Index rows, Index columns, T value = T{0}) : columns_(columns), data_(rows * columns, value) {
+                assert(rows > 0 && columns > 0 &&
                        "Rows and columns must be positive integers.");
         }
 
-        Matrix(std::initializer_list<std::initializer_list<T>> list) : cols_(list.begin()->size()) {
+        Matrix(std::initializer_list<std::initializer_list<T>> list) : columns_(list.begin()->size()) {
                 for (auto sublist: list) {
-                        assert(sublist.size() == cols_ &&
+                        assert(sublist.size() == columns_ &&
                                "Size of rows must be equal to the number of columns.");
                         data_.insert(data_.end(), sublist);
                 }
@@ -50,23 +46,23 @@ public:
         Matrix(const Matrix& rhs) = default;
 
         Matrix(Matrix&& rhs) noexcept
-            : cols_(std::exchange(rhs.cols_, 0)), data_(std::move(rhs.data_)) {
+            : columns_(std::exchange(rhs.columns_, 0)), data_(std::move(rhs.data_)) {
         }
 
         Matrix& operator=(const Matrix& rhs) = default;
 
         Matrix& operator=(Matrix&& rhs) noexcept {
-                cols_ = std::exchange(rhs.cols_, 0);
+                columns_ = std::exchange(rhs.columns_, 0);
                 data_ = std::move(rhs.data_);
                 return *this;
         }
 
         Index Rows() const {
-                return data_.size() / cols_;
+                return data_.size() / columns_;
         }
 
         Index Columns() const {
-                return cols_;
+                return columns_;
         }
 
         Matrix Diagonal() const {
@@ -152,11 +148,11 @@ public:
         }
 
         T operator()(const Index row_id, const Index col_id) const {
-                return data_[row_id * cols_ + col_id];
+                return data_[row_id * columns_ + col_id];
         }
 
         T& operator()(const Index row_id, const Index col_id) {
-                return data_[row_id * cols_ + col_id];
+                return data_[row_id * columns_ + col_id];
         }
 
         friend std::ostream& operator<<(std::ostream& os, const Matrix& matrix) {
@@ -177,7 +173,7 @@ public:
         }
 
 private:
-        Index cols_;
+        Index columns_;
         std::vector<T> data_;
 };
 
@@ -191,8 +187,8 @@ Matrix<typename F::ElementType> operator+(const F& lhs, const S& rhs) {
                "Matrices must have the same size for sum.");
 
         Matrix<T> result = lhs;
-        for (Index i = 0; i < lhs.Rows(); ++i) {
-                for (Index j = 0; j < lhs.Columns(); ++j) {
+        for (Index i = 0; i < lhs.Rows(); i++) {
+                for (Index j = 0; j < lhs.Columns(); j++) {
                         result(i, j) += rhs(i, j);
                 }
         }
@@ -205,8 +201,8 @@ F& operator+=(F& lhs, const S& rhs) {
         assert(lhs.Rows() == rhs.Rows() && lhs.Columns() == rhs.Columns() &&
                "Matrices must have the same size for sum.");
 
-        for (Index i = 0; i < lhs.Rows(); ++i) {
-                for (Index j = 0; j < lhs.Columns(); ++j) {
+        for (Index i = 0; i < lhs.Rows(); i++) {
+                for (Index j = 0; j < lhs.Columns(); j++) {
                         lhs(i, j) += rhs(i, j);
                 }
         }
@@ -222,8 +218,8 @@ Matrix<typename F::ElementType> operator-(const F& lhs, const S& rhs) {
                "Matrices must have the same size for subtraction.");
 
         Matrix<T> result = lhs;
-        for (Index i = 0; i < lhs.Rows(); ++i) {
-                for (Index j = 0; j < lhs.Columns(); ++j) {
+        for (Index i = 0; i < lhs.Rows(); i++) {
+                for (Index j = 0; j < lhs.Columns(); j++) {
                         result(i, j) -= rhs(i, j);
                 }
         }
@@ -236,8 +232,8 @@ F& operator-=(F& lhs, const S& rhs) {
         assert(lhs.Rows() == rhs.Rows() && lhs.Columns() == rhs.Columns() &&
                "Matrices must have the same size for sum.");
 
-        for (Index i = 0; i < lhs.Rows(); ++i) {
-                for (Index j = 0; j < lhs.Columns(); ++j) {
+        for (Index i = 0; i < lhs.Rows(); i++) {
+                for (Index j = 0; j < lhs.Columns(); j++) {
                         lhs(i, j) -= rhs(i, j);
                 }
         }
@@ -254,10 +250,10 @@ Matrix<typename F::ElementType> operator*(const F& lhs, const S& rhs) {
 
         Matrix<T> result(lhs.Rows(), rhs.Columns());
 
-        for (Index i = 0; i < lhs.Rows(); ++i) {
-                for (Index j = 0; j < rhs.Columns(); ++j) {
+        for (Index i = 0; i < lhs.Rows(); i++) {
+                for (Index j = 0; j < rhs.Columns(); j++) {
                         T sum = 0;
-                        for (Index k = 0; k < lhs.Columns(); ++k) {
+                        for (Index k = 0; k < lhs.Columns(); k++) {
                                 sum += lhs(i, k) * rhs(k, j);
                         }
                         result(i, j) = sum;
@@ -277,8 +273,8 @@ F& operator*=(F& lhs, const S& rhs) {
                "Number of columns of the left matrix must equal the number of rows of the right matrix");
 
         auto result = lhs * rhs;
-        for (Index i = 0; i < lhs.Rows(); ++i) {
-                for (Index j = 0; j < lhs.Columns(); ++j) {
+        for (Index i = 0; i < lhs.Rows(); i++) {
+                for (Index j = 0; j < lhs.Columns(); j++) {
                         lhs(i, j) = result(i, j);
                 }
         }
@@ -291,8 +287,8 @@ Matrix<typename F::ElementType> operator*(const F& lhs, typename F::ElementType 
         using T = typename F::ElementType;
         Matrix<T> result = lhs;
 
-        for (Index i = 0; i < lhs.Rows(); ++i) {
-                for (Index j = 0; j < lhs.Columns(); ++j) {
+        for (Index i = 0; i < lhs.Rows(); i++) {
+                for (Index j = 0; j < lhs.Columns(); j++) {
                         result(i, j) *= scalar;
                 }
         }
@@ -307,8 +303,8 @@ Matrix<typename F::ElementType> operator*(typename F::ElementType scalar, const 
 
 template<Helpers::MutableMatrixType F>
 F& operator*=(F& lhs, typename F::ElementType scalar) {
-        for (Index i = 0; i < lhs.Rows(); ++i) {
-                for (Index j = 0; j < lhs.Columns(); ++j) {
+        for (Index i = 0; i < lhs.Rows(); i++) {
+                for (Index j = 0; j < lhs.Columns(); j++) {
                         lhs(i, j) *= scalar;
                 }
         }
@@ -321,8 +317,8 @@ Matrix<typename F::ElementType> operator/(const F& lhs, typename F::ElementType 
         using T = typename F::ElementType;
         Matrix<T> result = lhs;
 
-        for (Index i = 0; i < lhs.Rows(); ++i) {
-                for (Index j = 0; j < lhs.Columns(); ++j) {
+        for (Index i = 0; i < lhs.Rows(); i++) {
+                for (Index j = 0; j < lhs.Columns(); j++) {
                         result(i, j) /= scalar;
                 }
         }
@@ -337,8 +333,8 @@ Matrix<typename F::ElementType> operator/(typename F::ElementType scalar, const 
 
 template<Helpers::MutableMatrixType F>
 F& operator/=(F& lhs, typename F::ElementType scalar) {
-        for (Index i = 0; i < lhs.Rows(); ++i) {
-                for (Index j = 0; j < lhs.Columns(); ++j) {
+        for (Index i = 0; i < lhs.Rows(); i++) {
+                for (Index j = 0; j < lhs.Columns(); j++) {
                         lhs(i, j) /= scalar;
                 }
         }
@@ -352,8 +348,8 @@ bool operator==(const F& lhs, const S& rhs) {
                 return false;
         }
 
-        for (Index i = 0; i < lhs.Rows(); ++i) {
-                for (Index j = 0; j < lhs.Columns(); ++j) {
+        for (Index i = 0; i < lhs.Rows(); i++) {
+                for (Index j = 0; j < lhs.Columns(); j++) {
                         if (lhs(i, j) != rhs(i, j)) {
                                 return false;
                         }

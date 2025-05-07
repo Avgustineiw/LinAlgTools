@@ -9,31 +9,32 @@ template <typename T> class ConstSubMatrix;
 } // namespace LinAlgTools
 
 namespace LinAlgTools::Helpers {
+namespace Implementation{
 template <typename T> 
-struct IsMatrixT : std::false_type {};
+struct IsMatrixType : std::false_type {};
 
 template <typename T>
-struct IsMatrixT<Matrix<T>> : std::true_type {};
+struct IsMatrixType<Matrix<T>> : std::true_type {};
 
 template <typename T>
-struct IsMatrixT<SubMatrix<T>> : std::true_type {};
+struct IsMatrixType<SubMatrix<T>> : std::true_type {};
 
 template <typename T>
-struct IsMatrixT<ConstSubMatrix<T>> : std::true_type {};
+struct IsMatrixType<ConstSubMatrix<T>> : std::true_type {};
 
 template <typename T>
-struct IsMutableMatrixT : std::false_type {};
+struct IsMutableMatrixType : std::false_type {};
 
 template <typename T>
-struct IsMutableMatrixT<Matrix<T>> : std::true_type {};
+struct IsMutableMatrixType<Matrix<T>> : std::true_type {};
 
 template <typename T>
-struct IsMutableMatrixT<SubMatrix<T>> : std::true_type {};
-
-
-template <typename T>
-concept MatrixType = IsMatrixT<std::remove_cv_t<T>>::value;
+struct IsMutableMatrixType<SubMatrix<T>> : std::true_type {};
+} //namespace Implementation
 
 template <typename T>
-concept MutableMatrixType = IsMutableMatrixT<std::remove_cv_t<T>>::value;
+concept MatrixType = Implementation::IsMatrixType<std::remove_cv_t<T>>::value;
+
+template <typename T>
+concept MutableMatrixType = Implementation::IsMutableMatrixType<std::remove_cv_t<T>>::value;
 } // namespace Helpers

@@ -1,40 +1,28 @@
 #pragma once
 
-#include "../helpers/index.h"
+#include "../helpers/matrix_type.h"
+#include "../helpers/types.h"
 
 #include <cassert>
 #include <cstddef>
-#include <cstdint>
 #include <ostream>
 
 namespace LinAlgTools {
 template<typename T>
-class Matrix;
-template<typename T>
-class ConstSubMatrix;
-
-template<typename T>
 class SubMatrix {
         using Index = Helpers::Types::Index;
-
-        struct RowSlice
-        {
-                Index begin = -1;
-                Index end = -1;
-        };
-        struct ColumnSlice
-        {
-                Index begin = -1;
-                Index end = -1;
-        };
+        using RowSlice = Helpers::Types::RowSlice;
+        using ColumnSlice = Helpers::Types::ColumnSlice;
 
 public:
         using ElementType = std::remove_cv_t<T>;
 
-        SubMatrix(Matrix<T>& matrix, RowSlice rows, ColumnSlice cols)
-            : pmatrix_(&matrix), rows_({rows.begin, rows.end}), cols_({cols.begin, cols.end}) {
+        SubMatrix(Matrix<T>& matrix, RowSlice rows, ColumnSlice columns)
+            : pmatrix_(&matrix),
+              rows_({rows.begin, rows.end}),
+              columns_({columns.begin, columns.end}) {
                 assert(rows.begin > -1 && rows.end < matrix.Rows() &&
-                       cols.begin > -1 && cols.end < matrix.Columns() &&
+                       columns.begin > -1 && columns.end < matrix.Columns() &&
                        "Slice must be inside the matrix");
         }
 
@@ -43,14 +31,14 @@ public:
         SubMatrix(SubMatrix&& rhs) noexcept
             : pmatrix_(std::exchange(rhs.pmatrix_, nullptr)),
               rows_(std::exchange(rhs.rows_, {0, 1})),
-              cols_(std::exchange(rhs.cols_, {0, 1})) {};
+              columns_(std::exchange(rhs.columns_, {0, 1})) {};
 
         SubMatrix& operator=(const SubMatrix& lhs) = default;
 
         SubMatrix& operator=(SubMatrix&& rhs) noexcept {
                 pmatrix_ = std::exchange(rhs.pmatrix_, nullptr);
                 rows_ = std::exchange(rhs.rows_, {0, 1});
-                cols_ = std::exchange(rhs.cols_, {0, 1});
+                columns_ = std::exchange(rhs.columns_, {0, 1});
                 return *this;
         }
 
@@ -59,22 +47,24 @@ public:
         }
 
         Index Columns() const {
-                return cols_.end - cols_.begin + 1;
+                return columns_.end - columns_.begin + 1;
         }
 
         T operator()(Index row, Index col) const {
-                assert(pmatrix_ != nullptr && "Pointer is null");
-                return (*pmatrix_)(rows_.begin + row, cols_.begin + col);
+                assert(pmatrix_ != nullptr &&
+                       "Pointer is null");
+                return (*pmatrix_)(rows_.begin + row, columns_.begin + col);
         }
 
         T& operator()(const Index row, const Index col) {
-                assert(pmatrix_ != nullptr && "Pointer is null");
-                return (*pmatrix_)(rows_.begin + row, cols_.begin + col);
+                assert(pmatrix_ != nullptr &&
+                       "Pointer is null");
+                return (*pmatrix_)(rows_.begin + row, columns_.begin + col);
         }
 
         ConstSubMatrix<T> ToConst() const {
                 return ConstSubMatrix<T>(*pmatrix_, {rows_.begin, rows_.end},
-                                         {cols_.begin, cols_.end});
+                                         {columns_.begin, columns_.end});
         }
 
         friend std::ostream& operator<<(std::ostream& os, const SubMatrix& matrix) {
@@ -98,6 +88,6 @@ public:
 private:
         Matrix<T>* pmatrix_;
         RowSlice rows_;
-        ColumnSlice cols_;
+        ColumnSlice columns_;
 };
 }// namespace LinAlgTools
