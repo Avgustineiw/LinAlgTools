@@ -1,4 +1,5 @@
 #pragma once
+#include "../helpers/sign.h"
 #include "../types/matrix.h"
 #include "../types/submatrix.h"
 
@@ -9,61 +10,40 @@
 
 //Мусорный код, который не стоит читать. Пока что скопирован из псевдокода книги Голубя, дальше буду пытаться привести к нормальному виду.
 namespace LinAlgTools::Algorithm {
-using Index = int64_t;
+namespace Implementation {
+template<typename T>
+struct PairQR
+{
+        Matrix<T> Q;
+        Matrix<T> R;
+};
+}//namespace Implementation
+using Index = Helpers::Types::Index;
 
-std::pair<Matrix<double>, double> HouseholderReduction(SubMatrix<double>& x) {
-        int m = x.Rows();
-        Matrix<double> v(m, 1);
+template<Helpers::MatrixType F>
+Implementation::PairQR<typename F::ElementType> QR_Householder(F& matrix) {
+        using T = F::ElementType;
 
-        double sigma = 0.0;
-        for (int i = 1; i < m; ++i) {
-                sigma += x(i, 0) * x(i, 0);
+        Matrix<T> Q = Matrix<T>::Identity(matrix.Rows());
+        Matrix<T> R = matrix;
+
+        for (Index column = 0; column < std::min(matrix.Rows(), matrix.Columns()); column++) {
+                Matrix<T> vector = R.GetSubMatrix({column, matrix.Rows() - 1},
+                                                       {column, column});
+                SubMatrix<T> submatrixR = R.GetSubMatrix({column, matrix.Rows() - 1},
+                                                              {column, matrix.Columns() - 1});
+                SubMatrix<T> submatrixQ = Q.GetSubMatrix({column, column + vector.Rows() - 1},
+                                                              {0, matrix.Columns() - 1});
+
+                vector(0, 0) -= Helpers::sgn(vector(0, 0)) * vector.Get2Norm();
+                vector.Normalize();
+
+                submatrixR -= (T{2} * vector) * (vector.Transposed() * submatrixR);
+                submatrixQ -= (T{2} * vector) * (vector.Transposed() * submatrixQ);
         }
 
-        if (sigma == 0.0) {
-                Matrix<double> v_zero(m, 1, 0.0);
-                return {v_zero, (x(0, 0) <= 0) ? 2.0 : 0.0};
-        }
-
-        double mu = std::sqrt(x(0, 0) * x(0, 0) + sigma);
-
-        if (x(0, 0) <= 0) {
-                v(0, 0) = x(0, 0) - mu;
-        }
-        else {
-                v(0, 0) = -sigma / (x(0, 0) + mu);
-        }
-
-        for (int i = 1; i < m; ++i) {
-                v(i, 0) = x(i, 0);
-        }
-
-        double v0 = v(0, 0);
-        double vTv = 1.0;
-        for (int i = 1; i < m; ++i) {
-                v(i, 0) /= v0;
-                vTv += v(i, 0) * v(i, 0);
-        }
-        v(0, 0) = 1.0;
-        double beta = 2.0 / vTv;
-
-        return {v, beta};
+        Q.Transpose();
+        return {std::move(Q), std::move(R)};
 }
 
-void QR_Householder(Matrix<double>& matrix) {
-        for (Index col = 0; col < std::min(matrix.Rows(), matrix.Columns()); col++) {
-                LinAlgTools::SubMatrix<double> vec = {matrix, {col, matrix.Rows() - 1}, {col, col}};
-                LinAlgTools::SubMatrix<double> subMatrix = {matrix, {col, matrix.Rows() - 1}, {col, matrix.Columns() - 1}};
-
-                auto res = LinAlgTools::Algorithm::HouseholderReduction(vec);
-                auto v = res.first;
-                auto beta = res.second;
-
-                auto v_transposed = v.Transposed();
-                auto outer_product = v * v_transposed;
-
-                subMatrix -= (beta * v) * (v_transposed * subMatrix);
-                std::cout << matrix << "\n\n";
-        }
-}
 }// namespace LinAlgTools::Algorithm

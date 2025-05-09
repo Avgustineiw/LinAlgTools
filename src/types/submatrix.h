@@ -6,6 +6,7 @@
 #include <cassert>
 #include <cstddef>
 #include <ostream>
+#include <utility>
 
 namespace LinAlgTools {
 template<typename T>
@@ -17,13 +18,20 @@ class SubMatrix {
 public:
         using ElementType = std::remove_cv_t<T>;
 
-        SubMatrix(Matrix<T>& matrix, RowSlice rows, ColumnSlice columns)
+        SubMatrix(Matrix<T>& matrix, RowSlice rows = {0, -1}, ColumnSlice columns = {0, -1})
             : pmatrix_(&matrix),
               rows_({rows.begin, rows.end}),
               columns_({columns.begin, columns.end}) {
                 assert(rows.begin > -1 && rows.end < matrix.Rows() &&
                        columns.begin > -1 && columns.end < matrix.Columns() &&
                        "Slice must be inside the matrix");
+
+                if (rows.end == -1) {
+                        rows_.end = matrix.Rows() - 1;
+                }
+                if (columns.end == -1) {
+                        columns_.end = matrix.Columns() - 1;
+                }
         }
 
         SubMatrix(const SubMatrix& rhs) = default;
@@ -42,6 +50,23 @@ public:
                 return *this;
         }
 
+        ConstSubMatrix<T> ToConstSubMatrix() const {
+                return ConstSubMatrix<T>(*pmatrix_, {rows_.begin, rows_.end},
+                                         {columns_.begin, columns_.end});
+        }
+
+        SubMatrix<T> GetSubMatrix(RowSlice rows, ColumnSlice columns) {
+                assert(pmatrix_ != nullptr && "Matrix pointer is null.");
+                assert(rows_.begin + rows.begin < Rows() &&
+                       rows_.begin + rows.end <= Rows() &&
+                       columns_.begin + columns.begin < Columns() &&
+                       columns_.begin + columns.end <= Columns() &&
+                       "Slice must be inside the matrix");
+
+                return SubMatrix<T>(*pmatrix_, {rows_.begin + rows.begin, rows_.begin + rows.end},
+                                    {columns_.begin + columns.begin, columns_.begin + columns.end});
+        }
+
         Index Rows() const {
                 return rows_.end - rows_.begin + 1;
         }
@@ -50,21 +75,50 @@ public:
                 return columns_.end - columns_.begin + 1;
         }
 
-        T operator()(Index row, Index col) const {
-                assert(pmatrix_ != nullptr &&
-                       "Pointer is null");
-                return (*pmatrix_)(rows_.begin + row, columns_.begin + col);
+        T Get2Norm() const {
+                return ToConstSubMatrix().Get2Norm();
         }
 
-        T& operator()(const Index row, const Index col) {
-                assert(pmatrix_ != nullptr &&
-                       "Pointer is null");
-                return (*pmatrix_)(rows_.begin + row, columns_.begin + col);
+        SubMatrix& Normalize() {
+                T norm = Get2Norm();
+                if (norm != 0) {
+                        *this /= norm;
+                }
+                return *this;
         }
 
-        ConstSubMatrix<T> ToConst() const {
-                return ConstSubMatrix<T>(*pmatrix_, {rows_.begin, rows_.end},
-                                         {columns_.begin, columns_.end});
+        SubMatrix& Transpose() {
+                transposed_ = true;
+                SwapRowsColumns(rows_, columns_);
+                return *this;
+        }
+
+        Matrix<T> Transposed() const {
+                Matrix<T> result{*this};
+                result.Transpose();
+                return result;
+        }
+
+
+        T operator()(Index row, Index column) const {
+                assert(pmatrix_ != nullptr &&
+                       "Pointer is null");
+
+                if (transposed_) {
+                        return (*pmatrix_)(columns_.begin + column, rows_.begin + row);
+                }
+                return (*pmatrix_)(rows_.begin + row, columns_.begin + column);
+        }
+
+        T& operator()(const Index row, const Index column) {
+                assert(pmatrix_ != nullptr &&
+                       "Pointer is null");
+
+                if (transposed_) {
+                        return (*pmatrix_)(columns_.begin + column, rows_.begin + row);
+                }
+
+                return (*pmatrix_)(rows_.begin + row, columns_.begin + column);
         }
 
         friend std::ostream& operator<<(std::ostream& os, const SubMatrix& matrix) {
@@ -89,5 +143,16 @@ private:
         Matrix<T>* pmatrix_;
         RowSlice rows_;
         ColumnSlice columns_;
+        bool transposed_ = false;
+
+        void SwapRowsColumns(RowSlice& rows, ColumnSlice& columns) {
+                rows.begin ^= columns.begin;
+                columns.begin ^= rows.begin;
+                rows.begin ^= columns.begin;
+
+                rows.end ^= columns.end;
+                columns.end ^= rows.end;
+                rows.end ^= columns.end;
+        }
 };
 }// namespace LinAlgTools

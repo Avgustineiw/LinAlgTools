@@ -14,6 +14,9 @@ namespace LinAlgTools {
 template<typename T>
 class Matrix {
         using Index = Helpers::Types::Index;
+        using RowSlice = Helpers::Types::RowSlice;
+        using ColumnSlice = Helpers::Types::ColumnSlice;
+
 
 public:
         using ElementType = std::remove_cv_t<T>;
@@ -41,7 +44,7 @@ public:
                 }
         }
 
-        Matrix(const SubMatrix<T>& rhs) : Matrix(rhs.ToConst()) {};
+        Matrix(const SubMatrix<T>& rhs) : Matrix(rhs.ToConstSubMatrix()) {};
 
         Matrix(const Matrix& rhs) = default;
 
@@ -56,6 +59,25 @@ public:
                 data_ = std::move(rhs.data_);
                 return *this;
         }
+
+        SubMatrix<T> ToSubMatrix() {
+                return SubMatrix<T>(*this);
+        }
+
+        ConstSubMatrix<T> ToSubMatrix() const {
+                return ConstSubMatrix<T>(*this);
+        }
+
+        SubMatrix<T> GetSubMatrix(RowSlice rows, ColumnSlice columns) {
+                return ToSubMatrix().GetSubMatrix({rows.begin, rows.end},
+                                                  {columns.begin, columns.end});
+        }
+
+        ConstSubMatrix<T> GetConstSubMatrix(RowSlice rows, ColumnSlice columns) {
+                return ToSubMatrix().GetSubMatrix({rows.begin, rows.end},
+                                                  {columns.begin, columns.end});
+        }
+
 
         Index Rows() const {
                 return data_.size() / columns_;
@@ -105,9 +127,9 @@ public:
         }
 
         template<class Function>
-        Matrix& Elementwise(Function f) {
+        Matrix& Elementwise(Function function) {
                 for (auto& element: data_) {
-                        f(element);
+                        function(element);
                 }
                 return *this;
         }
@@ -120,22 +142,12 @@ public:
                 return *this;
         }
 
-        T GetNorm() const {
-                assert(Rows() == 1 || Columns() == 1 &&
-                                              "Incorrect size for vector norm");
-
-                T res = T{0};
-                Elementwise([&res](const T& value) {
-                        res += value * value;
-                });
-                return std::sqrt(res);
+        T Get2Norm() const {
+                return ToSubMatrix().Get2Norm();
         }
 
         Matrix& Normalize() {
-                T norm = GetNorm();
-                if (norm != 0) {
-                        *this = *this / norm;
-                }
+                ToSubMatrix().Normalize();
                 return *this;
         }
 
@@ -147,12 +159,12 @@ public:
                 return res;
         }
 
-        T operator()(const Index row_id, const Index col_id) const {
-                return data_[row_id * columns_ + col_id];
+        T operator()(const Index row_id, const Index column_id) const {
+                return data_[row_id * columns_ + column_id];
         }
 
-        T& operator()(const Index row_id, const Index col_id) {
-                return data_[row_id * columns_ + col_id];
+        T& operator()(const Index row_id, const Index column_id) {
+                return data_[row_id * columns_ + column_id];
         }
 
         friend std::ostream& operator<<(std::ostream& os, const Matrix& matrix) {
