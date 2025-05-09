@@ -2,6 +2,8 @@
 
 #include "../helpers/matrix_type.h"
 #include "../helpers/types.h"
+#include "submatrix.h"
+#include "constsubmatrix.h"
 
 #include <cassert>
 #include <cstddef>
@@ -49,7 +51,7 @@ public:
                 return *this;
         }
 
-        SubMatrix<T> GetConstSubMatrix(RowSlice rows, ColumnSlice columns) {
+        SubMatrix<T> GetConstSubMatrix(RowSlice rows, ColumnSlice columns) const {
                 assert(pmatrix_ != nullptr && "Matrix pointer is null.");
                 assert(rows_.begin + rows.begin < Rows() &&
                        rows_.begin + rows.end <= Rows() &&
@@ -57,8 +59,9 @@ public:
                        columns_.begin + columns.end <= Columns() &&
                        "Slice must be inside the matrix");
 
-                return ConstSubMatrix<T>(*pmatrix_, {rows_.begin + rows.begin, rows_.begin + rows.end},
-                                    {columns_.begin + columns.begin, columns_.begin + columns.end});
+                return ConstSubMatrix<T>(*pmatrix_,
+                                         {rows_.begin + rows.begin, rows_.begin + rows.end},
+                                         {columns_.begin + columns.begin, columns_.begin + columns.end});
         }
 
 
@@ -68,6 +71,26 @@ public:
 
         Index Columns() const {
                 return columns_.end - columns_.begin + 1;
+        }
+
+        ConstSubMatrix<T> GetRow(Index row) const {
+                assert(pmatrix_ != nullptr &&
+                       "Pointer is null");
+                assert(row > 0 && row <= Rows() &&
+                       "Incorrect row index.");
+                return ConstSubMatrix(*pmatrix_,
+                                      {rows_.begin + row - 1, rows_.begin + row - 1},
+                                      {columns_.begin, columns_.end});
+        }
+
+        ConstSubMatrix<T> GetColumn(Index column) const {
+                assert(pmatrix_ != nullptr &&
+                       "Pointer is null");
+                assert(column > 0 && column <= Columns() &&
+                       "Incorrect column index.");
+                return ConstSubMatrix(*pmatrix_,
+                                      {rows_.begin, rows_.end},
+                                      {columns_.begin + column - 1, columns_.begin + column - 1});
         }
 
         template<class Function>

@@ -33,11 +33,11 @@ Implementation::PairQR<typename F::ElementType> QR_Householder(F& matrix) {
                 SubMatrix<T> submatrixR = R.GetSubMatrix({column, matrix.Rows() - 1},
                                                               {column, matrix.Columns() - 1});
                 SubMatrix<T> submatrixQ = Q.GetSubMatrix({column, column + vector.Rows() - 1},
-                                                              {0, matrix.Columns() - 1});
+                                                              {0, matrix.Rows() - 1});
 
                 vector(0, 0) -= Helpers::sgn(vector(0, 0)) * vector.Get2Norm();
                 vector.Normalize();
-
+        
                 submatrixR -= (T{2} * vector) * (vector.Transposed() * submatrixR);
                 submatrixQ -= (T{2} * vector) * (vector.Transposed() * submatrixQ);
         }

@@ -2,6 +2,8 @@
 
 #include "../helpers/matrix_type.h"
 #include "../helpers/types.h"
+#include "constsubmatrix.h"
+#include "submatrix.h"
 
 #include <cassert>
 #include <cstddef>
@@ -51,19 +53,22 @@ public:
         }
 
         ConstSubMatrix<T> ToConstSubMatrix() const {
-                return ConstSubMatrix<T>(*pmatrix_, {rows_.begin, rows_.end},
+                return ConstSubMatrix<T>(*pmatrix_,
+                                         {rows_.begin, rows_.end},
                                          {columns_.begin, columns_.end});
         }
 
         SubMatrix<T> GetSubMatrix(RowSlice rows, ColumnSlice columns) {
-                assert(pmatrix_ != nullptr && "Matrix pointer is null.");
+                assert(pmatrix_ != nullptr &&
+                       "Matrix pointer is null.");
                 assert(rows_.begin + rows.begin < Rows() &&
                        rows_.begin + rows.end <= Rows() &&
                        columns_.begin + columns.begin < Columns() &&
                        columns_.begin + columns.end <= Columns() &&
                        "Slice must be inside the matrix");
 
-                return SubMatrix<T>(*pmatrix_, {rows_.begin + rows.begin, rows_.begin + rows.end},
+                return SubMatrix<T>(*pmatrix_,
+                                    {rows_.begin + rows.begin, rows_.begin + rows.end},
                                     {columns_.begin + columns.begin, columns_.begin + columns.end});
         }
 
@@ -73,6 +78,26 @@ public:
 
         Index Columns() const {
                 return columns_.end - columns_.begin + 1;
+        }
+
+        SubMatrix<T> GetRow(Index row) {
+                assert(pmatrix_ != nullptr &&
+                       "Pointer is null");
+                assert(row > 0 && row <= Rows() &&
+                       "Incorrect row index.");
+                return SubMatrix(*pmatrix_,
+                                 {rows_.begin + row - 1, rows_.begin - 1},
+                                 {columns_.begin, columns_.end});
+        }
+
+        SubMatrix<T> GetColumn(Index column) {
+                assert(pmatrix_ != nullptr &&
+                       "Pointer is null");
+                assert(column > 0 && column <= Columns() &&
+                       "Incorrect column index.");
+                return SubMatrix(*pmatrix_,
+                                 {rows_.begin, rows_.end},
+                                 {columns_.begin + column - 1, columns_.begin + column - 1});
         }
 
         T Get2Norm() const {

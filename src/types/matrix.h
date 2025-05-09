@@ -2,10 +2,11 @@
 
 #include "../helpers/matrix_type.h"
 #include "../helpers/types.h"
+#include "submatrix.h"
+#include "constsubmatrix.h"
 
 #include <cassert>
 #include <initializer_list>
-#include <iostream>
 #include <ostream>
 #include <utility>
 #include <vector>
@@ -16,7 +17,6 @@ class Matrix {
         using Index = Helpers::Types::Index;
         using RowSlice = Helpers::Types::RowSlice;
         using ColumnSlice = Helpers::Types::ColumnSlice;
-
 
 public:
         using ElementType = std::remove_cv_t<T>;
@@ -73,11 +73,10 @@ public:
                                                   {columns.begin, columns.end});
         }
 
-        ConstSubMatrix<T> GetConstSubMatrix(RowSlice rows, ColumnSlice columns) {
+        ConstSubMatrix<T> GetSubMatrix(RowSlice rows, ColumnSlice columns) const {
                 return ToSubMatrix().GetSubMatrix({rows.begin, rows.end},
                                                   {columns.begin, columns.end});
         }
-
 
         Index Rows() const {
                 return data_.size() / columns_;
@@ -85,6 +84,22 @@ public:
 
         Index Columns() const {
                 return columns_;
+        }
+
+        SubMatrix<T> GetRow(Index row) {
+                return ToSubMatrix().GetRow(row);
+        }
+
+        ConstSubMatrix<T> GetRow(Index row) const {
+                return ToSubMatrix().GetRow(row);
+        }
+
+        SubMatrix<T> GetColumn(Index column) {
+                return ToSubMatrix().GetColumn(column);
+        }
+
+        ConstSubMatrix<T> GetColumn(Index column) const {
+                return ToSubMatrix().GetColumn(column);
         }
 
         Matrix Diagonal() const {
