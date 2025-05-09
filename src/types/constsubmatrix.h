@@ -2,8 +2,8 @@
 
 #include "../helpers/matrix_type.h"
 #include "../helpers/types.h"
+#include "matrix.h"
 #include "submatrix.h"
-#include "constsubmatrix.h"
 
 #include <cassert>
 #include <cstddef>
@@ -103,6 +103,23 @@ public:
                 return *this;
         }
 
+        Matrix<T> Diagonal() const {
+                const Index size = std::min(Rows(), Columns());
+                Matrix<T> result(size, 1);
+                for (Index i = 0; i < size; i++) {
+                        result(i, 0) = (*this)(i, i);
+                }
+                return result;
+        }
+
+        T Trace() const {
+                T result = 0;
+                const Index size = std::min(Rows(), Columns());
+                for (Index i = 0; i < size; i++) {
+                        result += (*this)(i, i);
+                }
+                return result;
+        }
 
         T Get2Norm() const {
                 assert(Rows() == 1 || Columns() == 1 &&
@@ -115,6 +132,11 @@ public:
                 return std::sqrt(res);
         }
 
+        Matrix<T> Transposed() const {
+                Matrix<T> result{*this};
+                result.Transpose();
+                return result;
+        }
 
         T operator()(Index row, Index column) const {
                 assert(pmatrix_ != nullptr &&

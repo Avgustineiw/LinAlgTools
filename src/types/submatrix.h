@@ -3,7 +3,7 @@
 #include "../helpers/matrix_type.h"
 #include "../helpers/types.h"
 #include "constsubmatrix.h"
-#include "submatrix.h"
+#include "matrix.h"
 
 #include <cassert>
 #include <cstddef>
@@ -86,7 +86,7 @@ public:
                 assert(row > 0 && row <= Rows() &&
                        "Incorrect row index.");
                 return SubMatrix(*pmatrix_,
-                                 {rows_.begin + row - 1, rows_.begin - 1},
+                                 {rows_.begin + row - 1, rows_.begin + row - 1},
                                  {columns_.begin, columns_.end});
         }
 
@@ -98,6 +98,14 @@ public:
                 return SubMatrix(*pmatrix_,
                                  {rows_.begin, rows_.end},
                                  {columns_.begin + column - 1, columns_.begin + column - 1});
+        }
+
+        Matrix<T> Diagonal() const {
+                return ToConstSubMatrix().Diagonal();
+        }
+
+        T Trace() const {
+                return ToConstSubMatrix().Trace();
         }
 
         T Get2Norm() const {
@@ -122,6 +130,21 @@ public:
                 Matrix<T> result{*this};
                 result.Transpose();
                 return result;
+        }
+
+        template<class Function>
+        SubMatrix<T>& Elementwise(Function function) {
+                for (Index i = 0; i < Rows(); i++) {
+                        for (Index j = 0; j < Columns(); j++) {
+                                function((*this)(i, j));
+                        }
+                }
+                return *this;
+        }
+
+        template<class Function>
+        const ConstSubMatrix<T>& Elementwise(Function function) const {
+                return ToConstSubMatrix().Elementwise(function);
         }
 
 

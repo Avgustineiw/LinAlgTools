@@ -103,21 +103,11 @@ public:
         }
 
         Matrix Diagonal() const {
-                const Index size = std::min(Rows(), Columns());
-                Matrix<T> result(size, 1);
-                for (Index i = 0; i < size; i++) {
-                        result(i, 0) = (*this)(i, i);
-                }
-                return result;
+                     return ToSubMatrix().Diagonal();
         }
 
         T Trace() const {
-                T result = 0;
-                const Index size = std::min(Rows(), Columns());
-                for (Index i = 0; i < size; i++) {
-                        result += (*this)(i, i);
-                }
-                return result;
+                return ToSubMatrix().Trace();
         }
 
         Matrix& Transpose() {
@@ -131,29 +121,19 @@ public:
                 return *this;
         }
 
-        Matrix Transposed() {
-                Matrix<T> result(Columns(), Rows());
-                for (Index i = 0; i < Rows(); i++) {
-                        for (Index j = 0; j < Columns(); j++) {
-                                result(j, i) = (*this)(i, j);
-                        }
-                }
-                return result;
+        Matrix Transposed() const {
+                return ToSubMatrix().Transposed();
         }
 
         template<class Function>
         Matrix& Elementwise(Function function) {
-                for (auto& element: data_) {
-                        function(element);
-                }
+                ToSubMatrix().Elementwise(function);
                 return *this;
         }
 
         template<class Function>
-        const Matrix& Elementwise(Function f) const {
-                for (const auto& element: data_) {
-                        f(element);
-                }
+        const Matrix& Elementwise(Function function) const {
+                ToSubMatrix().Elementwise(function);
                 return *this;
         }
 

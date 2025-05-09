@@ -1,107 +1,217 @@
 #include "../src/types/matrix.h"
 #include <gtest/gtest.h>
 
-template<typename T = double>
-using Matrix = LinAlgTools::Matrix<T>;
+using namespace LinAlgTools;
 
-TEST(TEST_MATRIX, BasicConstructors) {
-        {
-                Matrix<float> square(5, 5);
-                EXPECT_EQ(square.Rows(), 5);
-                EXPECT_EQ(square.Columns(), 5);
+TEST(TEST_MATRIX, ConstructionAndBasicProperties) {
+        // Default construction
+        Matrix<double> m1(3, 4);
+        EXPECT_EQ(m1.Rows(), 3);
+        EXPECT_EQ(m1.Columns(), 4);
 
-                Matrix<double> rect(2, 3);
-                EXPECT_EQ(rect.Rows(), 2);
-                EXPECT_EQ(rect.Columns(), 3);
+        // Initializer list construction
+        Matrix<double> m2 = {{1, 2, 3}, {4, 5, 6}};
+        EXPECT_EQ(m2.Rows(), 2);
+        EXPECT_EQ(m2.Columns(), 3);
 
-                EXPECT_TRUE(rect == Matrix<double>({{0, 0, 0}, {0, 0, 0}}));
-        }
-        {
-                Matrix<long double> matrix = {{1, 2, 3}, {4, 5, 6}};
-                EXPECT_TRUE(matrix == Matrix<long double>({{1, 2, 3}, {4, 5, 6}}));
-        }
+        // Square matrix construction
+        Matrix<double> m3(5);
+        EXPECT_EQ(m3.Rows(), 5);
+        EXPECT_EQ(m3.Columns(), 5);
 }
 
-TEST(TEST_MATRIX, CopySemantics) {
-        using Matrix = Matrix<double>;
-        Matrix m1(2, 2);
+TEST(TEST_MATRIX, ElementAccess) {
+        Matrix<double> m = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}};
 
-        {
-                Matrix m2 = {{1.0, 7.4}, {4.1, 5.6}};
-                m1 = m2;
-                EXPECT_TRUE(m1 == m2);
+        // Check const access
+        EXPECT_EQ(m(0, 0), 1);
+        EXPECT_EQ(m(1, 1), 5);
+        EXPECT_EQ(m(2, 2), 9);
 
-                m2(0, 0) = 0.3;
-                EXPECT_FALSE(m1 == m2);
-        }
-
-        EXPECT_TRUE(m1 == Matrix({{1.0, 7.4}, {4.1, 5.6}}));
+        // Check non-const access and modification
+        m(1, 1) = 10;
+        EXPECT_EQ(m(1, 1), 10);
 }
 
-TEST(TEST_MATRIX, MoveSemantics) {
-        using Matrix = Matrix<float>;
-        Matrix m1(2, 2);
+TEST(TEST_MATRIX, CopyAndMoveOperations) {
+        Matrix<double> original = {{1, 2}, {3, 4}};
 
-        {
-                Matrix m2 = {{1, -1}, {0, 2}, {-1, 0}, {-2, 1}};
-                m1 = std::move(m2);
-        }
+        // Copy constructor
+        Matrix<double> copy(original);
+        EXPECT_EQ(copy, original);
 
-        EXPECT_TRUE(m1 == Matrix({{1, -1}, {0, 2}, {-1, 0}, {-2, 1}}));
+        // Move constructor
+        Matrix<double> moved(std::move(copy));
+        EXPECT_EQ(moved, original);
+        EXPECT_EQ(copy.Rows(), 0);// NOLINT(bugprone-use-after-move)
+
+        // Copy assignment
+        Matrix<double> copyAssigned = original;
+        EXPECT_EQ(copyAssigned, original);
+
+        // Move assignment
+        Matrix<double> moveAssigned = std::move(copyAssigned);
+        EXPECT_EQ(moveAssigned, original);
+        EXPECT_EQ(copyAssigned.Rows(), 0);// NOLINT(bugprone-use-after-move)
 }
 
-void CheckArithmeticSum() {
-        using Matrix = Matrix<double>;
+TEST(TEST_MATRIX, MatrixOperations) {
+        Matrix<double> a = {{1, 2}, {3, 4}};
+        Matrix<double> b = {{5, 6}, {7, 8}};
 
-        Matrix m1 = {{1, 2, 3}, {4, 5, 6}};
-        Matrix m2 = {{7, 8, 9}, {10, 11, 12}};
-        EXPECT_TRUE(m1 + m2 == Matrix({{8, 10, 12}, {14, 16, 18}}));
+        // Addition
+        Matrix<double> sum = a + b;
+        Matrix<double> expectedSum = {{6, 8}, {10, 12}};
+        EXPECT_EQ(sum, expectedSum);
 
-        m1 += m1;
-        m1 += m2;
-        EXPECT_TRUE(m1 == Matrix({{9, 12, 15}, {18, 21, 24}}));
+        // Subtraction
+        Matrix<double> diff = a - b;
+        Matrix<double> expectedDiff = {{-4, -4}, {-4, -4}};
+        EXPECT_EQ(diff, expectedDiff);
+
+        // Multiplication
+        Matrix<double> product = a * b;
+        Matrix<double> expectedProduct = {{19, 22}, {43, 50}};
+        EXPECT_EQ(product, expectedProduct);
+
+        // Scalar multiplication
+        Matrix<double> scaled = a * 2.0;
+        Matrix<double> expectedScaled = {{2, 4}, {6, 8}};
+        EXPECT_EQ(scaled, expectedScaled);
 }
 
-void CheckArithmeticDiff() {
-        using Matrix = Matrix<double>;
+TEST(TEST_MATRIX, InPlaceOperations) {
+        Matrix<double> a = {{1, 2}, {3, 4}};
+        Matrix<double> b = {{5, 6}, {7, 8}};
 
-        Matrix m1 = {{9, 4}, {5, 1}, {12, 9}};
-        Matrix m2 = {{-3, 0}, {1, 4}, {6, -12}};
-        EXPECT_TRUE(m1 - m2 == Matrix({{12, 4}, {4, -3}, {6, 21}}));
+        // +=
+        Matrix<double> a_plus_b = a;
+        a_plus_b += b;
+        EXPECT_EQ(a_plus_b, (Matrix<double>{{6, 8}, {10, 12}}));
 
-        m1 -= m2;
-        m1 -= m2;
-        EXPECT_TRUE(m1 == Matrix({{15, 4}, {3, -7}, {0, 33}}));
+        // -=
+        Matrix<double> a_minus_b = a;
+        a_minus_b -= b;
+        EXPECT_EQ(a_minus_b, (Matrix<double>{{-4, -4}, {-4, -4}}));
+
+        // *=
+        Matrix<double> a_times_b = a;
+        a_times_b *= b;
+        EXPECT_EQ(a_times_b, (Matrix<double>{{19, 22}, {43, 50}}));
+
+        // *= scalar
+        Matrix<double> a_scaled = a;
+        a_scaled *= 2.0;
+        EXPECT_EQ(a_scaled, (Matrix<double>{{2, 4}, {6, 8}}));
 }
 
-void CheckArithmeticMulti() {
-        using Matrix = Matrix<double>;
+TEST(TEST_MATRIX, TransposeOperations) {
+        Matrix<double> m = {{1, 2, 3}, {4, 5, 6}};
 
-        Matrix m1 = {{8, 6, 1}, {8, 5, 1}};
-        Matrix m2 = {{1, 2}, {-4, 2}, {0, -3}};
+        // Transposed()
+        Matrix<double> transposed = m.Transposed();
+        Matrix<double> expectedTransposed = {{1, 4}, {2, 5}, {3, 6}};
+        EXPECT_EQ(transposed, expectedTransposed);
 
-        EXPECT_TRUE(m1 * m2 == Matrix({{-16, 25}, {-12, 23}}));
-        EXPECT_TRUE(m2 * m1 ==
-                    Matrix({{24, 16, 3}, {-16, -14, -2}, {-24, -15, -3}}));
+        // Transpose() in-place
+        m.Transpose();
+        EXPECT_EQ(m, expectedTransposed);
 }
 
-TEST(TEST_MATRIX, Arithmetic) {
-        CheckArithmeticSum();
-        CheckArithmeticDiff();
-        CheckArithmeticMulti();
+TEST(TEST_MATRIX, SpecialMatrices) {
+        // Identity matrix
+        Matrix<double> identity = Matrix<double>::Identity(3);
+        Matrix<double> expectedIdentity = {{1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
+        EXPECT_EQ(identity, expectedIdentity);
+
+        // Diagonal
+        Matrix<double> m = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}};
+        Matrix<double> diagonal = m.Diagonal();
+        Matrix<double> expectedDiagonal = {{1}, {5}, {9}};
+        EXPECT_EQ(diagonal, expectedDiagonal);
+
+        // Trace
+        EXPECT_EQ(m.Trace(), 15);
 }
 
-TEST(TEST_MATRIX, Transpose) {
-        using Matrix = Matrix<float>;
+TEST(TEST_MATRIX, SubMatrixOperations) {
+        Matrix<double> m = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}};
 
-        {
-                Matrix m1 = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}};
-                m1.Transpose();
-                EXPECT_TRUE(m1 == Matrix({{1, 4, 7}, {2, 5, 8}, {3, 6, 9}}));
-        }
-        {
-                Matrix m2 = {{0, 0}, {2, 2}, {4, 4}};
+        // Get row
+        auto row = m.GetRow(2);
+        Matrix<double> expectedRow = {{4, 5, 6}};
+        EXPECT_EQ(row, expectedRow);
 
-                EXPECT_TRUE(m2 == Matrix({{0, 0}, {2, 2}, {4, 4}}));
-        }
+        // Get column
+        auto col = m.GetColumn(3);
+        Matrix<double> expectedCol = {{3}, {6}, {9}};
+        EXPECT_EQ(col, expectedCol);
+
+        // Get submatrix
+        auto sub = m.GetSubMatrix({1, 2}, {0, 1});
+        Matrix<double> expectedSub = {{4, 5}, {7, 8}};
+        EXPECT_EQ(sub, expectedSub);
+}
+
+TEST(TEST_MATRIX, NormAndNormalization) {
+        Matrix<double> m = {{1}, {2}, {3}, {4}};
+
+        // 2-norm
+        double norm = m.Get2Norm();
+        EXPECT_DOUBLE_EQ(norm, std::sqrt(1 + 4 + 9 + 16));
+
+        // Normalization
+        Matrix<double> normalized = m;
+        normalized.Normalize();
+        double normalizedNorm = normalized.Get2Norm();
+        EXPECT_NEAR(normalizedNorm, 1.0, 1e-10);
+}
+
+TEST(TEST_MATRIX, ElementwiseOperations) {
+        Matrix<double> m = {{1, 2}, {3, 4}};
+
+        // Apply a function elementwise
+        m.Elementwise([](double& x) { x = x * x; });
+        Matrix<double> expected = {{1, 4}, {9, 16}};
+        EXPECT_EQ(m, expected);
+}
+
+TEST(TEST_MATRIX, ComparisonOperators) {
+        Matrix<double> m1 = {{1, 2}, {3, 4}};
+        Matrix<double> m2 = {{1, 2}, {3, 4}};
+        Matrix<double> m3 = {{5, 6}, {7, 8}};
+
+        // Equality
+        EXPECT_TRUE(m1 == m2);
+        EXPECT_FALSE(m1 == m3);
+
+        // Inequality
+        EXPECT_FALSE(m1 != m2);
+        EXPECT_TRUE(m1 != m3);
+
+        // Different dimensions
+        Matrix<double> m4 = {{1, 2, 3}, {4, 5, 6}};
+        EXPECT_FALSE(m1 == m4);
+        EXPECT_TRUE(m1 != m4);
+}
+
+TEST(TEST_MATRIX, EdgeCases) {
+        // Empty matrix (should be prevented by assertions)
+        // Matrix<double> empty(0, 0);  // This should trigger an assert
+
+        // Single element matrix
+        Matrix<double> single = {{42}};
+        EXPECT_EQ(single.Rows(), 1);
+        EXPECT_EQ(single.Columns(), 1);
+        EXPECT_EQ(single(0, 0), 42);
+
+        // Row vector
+        Matrix<double> row = {{1, 2, 3}};
+        EXPECT_EQ(row.Rows(), 1);
+        EXPECT_EQ(row.Columns(), 3);
+
+        // Column vector
+        Matrix<double> col = {{1}, {2}, {3}};
+        EXPECT_EQ(col.Rows(), 3);
+        EXPECT_EQ(col.Columns(), 1);
 }
