@@ -25,7 +25,7 @@ public:
               columns_({columns.begin, columns.end}) {
                 assert(rows.begin > -1 && rows.end < matrix.Rows() &&
                        columns.begin > -1 && columns.end < matrix.Columns() &&
-                       "Slice must be inside the matrix");
+                       "Slice must be inside the matrix.");
 
                 if (rows.end == -1) {
                         rows_.end = matrix.Rows() - 1;
@@ -57,7 +57,7 @@ public:
                        rows_.begin + rows.end <= Rows() &&
                        columns_.begin + columns.begin < Columns() &&
                        columns_.begin + columns.end <= Columns() &&
-                       "Slice must be inside the matrix");
+                       "Slice must be inside the matrix.");
 
                 return ConstSubMatrix<T>(*pmatrix_,
                                          {rows_.begin + rows.begin, rows_.begin + rows.end},
@@ -75,7 +75,7 @@ public:
 
         ConstSubMatrix<T> GetRow(Index row) const {
                 assert(pmatrix_ != nullptr &&
-                       "Pointer is null");
+                       "Pointer is null.");
                 assert(row > 0 && row <= Rows() &&
                        "Incorrect row index.");
                 return ConstSubMatrix(*pmatrix_,
@@ -85,7 +85,7 @@ public:
 
         ConstSubMatrix<T> GetColumn(Index column) const {
                 assert(pmatrix_ != nullptr &&
-                       "Pointer is null");
+                       "Pointer is null.");
                 assert(column > 0 && column <= Columns() &&
                        "Incorrect column index.");
                 return ConstSubMatrix(*pmatrix_,
@@ -123,7 +123,7 @@ public:
 
         T Get2Norm() const {
                 assert(Rows() == 1 || Columns() == 1 &&
-                                              "Incorrect size for vector norm");
+                                              "Incorrect size for vector norm.");
 
                 T res = T{0};
                 Elementwise([&res](const T& value) {
@@ -140,7 +140,7 @@ public:
 
         T operator()(Index row, Index column) const {
                 assert(pmatrix_ != nullptr &&
-                       "Pointer is null");
+                       "Pointer is null.");
                 return (*pmatrix_)(rows_.begin + row, columns_.begin + column);
         }
 

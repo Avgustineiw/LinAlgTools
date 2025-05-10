@@ -2,8 +2,8 @@
 
 #include "../helpers/matrix_type.h"
 #include "../helpers/types.h"
-#include "submatrix.h"
 #include "constsubmatrix.h"
+#include "submatrix.h"
 
 #include <cassert>
 #include <initializer_list>
@@ -103,7 +103,7 @@ public:
         }
 
         Matrix Diagonal() const {
-                     return ToSubMatrix().Diagonal();
+                return ToSubMatrix().Diagonal();
         }
 
         T Trace() const {

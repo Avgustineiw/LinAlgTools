@@ -26,7 +26,7 @@ public:
               columns_({columns.begin, columns.end}) {
                 assert(rows.begin > -1 && rows.end < matrix.Rows() &&
                        columns.begin > -1 && columns.end < matrix.Columns() &&
-                       "Slice must be inside the matrix");
+                       "Slice must be inside the matrix.");
 
                 if (rows.end == -1) {
                         rows_.end = matrix.Rows() - 1;
@@ -65,7 +65,7 @@ public:
                        rows_.begin + rows.end <= Rows() &&
                        columns_.begin + columns.begin < Columns() &&
                        columns_.begin + columns.end <= Columns() &&
-                       "Slice must be inside the matrix");
+                       "Slice must be inside the matrix.");
 
                 return SubMatrix<T>(*pmatrix_,
                                     {rows_.begin + rows.begin, rows_.begin + rows.end},
@@ -92,7 +92,7 @@ public:
 
         SubMatrix<T> GetColumn(Index column) {
                 assert(pmatrix_ != nullptr &&
-                       "Pointer is null");
+                       "Pointer is null.");
                 assert(column > 0 && column <= Columns() &&
                        "Incorrect column index.");
                 return SubMatrix(*pmatrix_,
@@ -150,7 +150,7 @@ public:
 
         T operator()(Index row, Index column) const {
                 assert(pmatrix_ != nullptr &&
-                       "Pointer is null");
+                       "Pointer is null.");
 
                 if (transposed_) {
                         return (*pmatrix_)(columns_.begin + column, rows_.begin + row);
@@ -160,7 +160,7 @@ public:
 
         T& operator()(const Index row, const Index column) {
                 assert(pmatrix_ != nullptr &&
-                       "Pointer is null");
+                       "Pointer is null.");
 
                 if (transposed_) {
                         return (*pmatrix_)(columns_.begin + column, rows_.begin + row);
