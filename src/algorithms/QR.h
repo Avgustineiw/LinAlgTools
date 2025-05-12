@@ -1,4 +1,5 @@
 #pragma once
+#include "../helpers/functions.h"
 #include "../helpers/sign.h"
 #include "../types/matrix.h"
 #include "../types/submatrix.h"
@@ -18,14 +19,14 @@ struct PairQR
 template<typename T>
 struct GivensPair
 {
-        T cos = T{0};
+        T cos = T{1};
         T sin = T{0};
 };
 }//namespace Implementation
 using Index = Helpers::Types::Index;
 
 template<Helpers::MatrixType F>
-Implementation::PairQR<typename F::ElementType> QR_Householder(F& matrix) {
+Implementation::PairQR<typename F::ElementType> QR_Householder(const F& matrix) {
         using T = F::ElementType;
 
         Matrix<T> Q = Matrix<T>::Identity(matrix.Rows());
@@ -47,49 +48,72 @@ Implementation::PairQR<typename F::ElementType> QR_Householder(F& matrix) {
         }
 
         Q.Transpose();
+        R.RemoveZeros();
         return {std::move(Q), std::move(R)};
 }
 
-template<Helpers::MatrixType F>
-Implementation::PairQR<typename F::ElementType> QR_Givens(F& matrix) {
-        using T = F::ElementType;
+template<typename T>
+Implementation::GivensPair<T> CalculateGivensPair(T first, T second) {
+        T norm = std::sqrt(first * first + second * second);
+        if (Helpers::IsZero(norm)) {
+                return {T{1}, T{0}};
+        }
+        return {first / norm, -second / norm};
+}
 
-        Matrix<double> Q = Matrix<double>::Identity(matrix.Rows());
-        Matrix<double> R = matrix;
+template<Helpers::MatrixType M>
+void GivensLeftRotation(M& matrix,
+                        Index row, Index column,
+                        typename M::ElementType first,
+                        typename M::ElementType second) {
+        using T = M::ElementType;
+
+        auto [cos, sin] = CalculateGivensPair(first, second);
+        for (Index i = column; i < matrix.Columns(); i++) {
+                T upper = matrix(row, i);
+                T lower = matrix(row + 1, i);
+                matrix(row, i) = cos * upper - sin * lower;
+                matrix(row + 1, i) = sin * upper + cos * lower;
+        }
+}
+
+template<Helpers::MatrixType M>
+void GivensRightRotation(M& matrix,
+                         Index row, Index column,
+                         typename M::ElementType first,
+                         typename M::ElementType second) {
+        using T = M::ElementType;
+
+        auto [cos, sin] = CalculateGivensPair(first, second);
+        for (Index i = 0; i < matrix.Rows(); i++) {
+                T left = matrix(i, row);
+                T right = matrix(i, row + 1);
+                matrix(i, row) = cos * left - sin * right;
+                matrix(i, row + 1) = sin * left + cos * right;
+        }
+}
+
+
+template<Helpers::MatrixType M>
+Implementation::PairQR<typename M::ElementType> QR_Givens(const M& matrix) {
+        using T = typename M::ElementType;
+
+        Matrix<T> Q = Matrix<T>::Identity(matrix.Rows());
+        Matrix<T> R = matrix;
 
         for (Index column = 0; column < std::min(matrix.Rows(), matrix.Columns()); column++) {
                 for (Index row = matrix.Rows() - 2; row >= column; row--) {
                         T first = R(row, column);
                         T second = R(row + 1, column);
-                        T cos, sin;
 
-                        if (std::abs(second) < 1e-10) {
-                                continue;
-                        }
+                        if (Helpers::IsZero(second)) continue;
 
-                        T norm = std::sqrt(first * first + second * second);
-
-                        if (norm < 1e-10) {
-                                cos = T{1};
-                                sin = T{0};
-                        }
-                        else {
-                                cos = first / norm;
-                                sin = -second / norm;
-                        }
-
-                        Matrix<T> givens = Matrix<double>::Identity(matrix.Rows());
-                        givens(row, row) = cos;
-                        givens(row + 1, row + 1) = cos;
-                        givens(row, row + 1) = -sin;
-                        givens(row + 1, row) = sin;
-
-                        R = givens * R;
-                        Q = givens * Q;
+                        GivensLeftRotation(R, row, column, first, second);
+                        GivensRightRotation(Q, row, column, first, second);
                 }
         }
 
-        Q.Transpose();
+        R.RemoveZeros();
         return {std::move(Q), std::move(R)};
 }
 }// namespace LinAlgTools::Algorithm

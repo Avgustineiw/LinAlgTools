@@ -137,6 +137,11 @@ public:
                 return *this;
         }
 
+        Matrix& RemoveZeros() {
+                ToSubMatrix().RemoveZeros();
+                return *this;
+        }
+
         T Get2Norm() const {
                 return ToSubMatrix().Get2Norm();
         }
@@ -266,7 +271,8 @@ Matrix<typename F::ElementType> operator*(const F& lhs, const S& rhs) {
                         result(i, j) = sum;
                 }
         }
-
+        
+        result.RemoveZeros();
         return result;
 }
 
@@ -285,7 +291,8 @@ F& operator*=(F& lhs, const S& rhs) {
                         lhs(i, j) = result(i, j);
                 }
         }
-
+        
+        lhs.RemoveZeros();
         return lhs;
 }
 
@@ -300,6 +307,7 @@ Matrix<typename F::ElementType> operator*(const F& lhs, typename F::ElementType 
                 }
         }
 
+        result.RemoveZeros();
         return result;
 }
 
@@ -316,6 +324,7 @@ F& operator*=(F& lhs, typename F::ElementType scalar) {
                 }
         }
 
+        lhs.RemoveZeros();
         return lhs;
 }
 
@@ -330,6 +339,7 @@ Matrix<typename F::ElementType> operator/(const F& lhs, typename F::ElementType 
                 }
         }
 
+        result.RemoveZeros();
         return result;
 }
 
@@ -346,6 +356,7 @@ F& operator/=(F& lhs, typename F::ElementType scalar) {
                 }
         }
 
+        lhs.RemoveZeros();
         return lhs;
 }
 

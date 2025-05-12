@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../helpers/functions.h"
 #include "../helpers/matrix_type.h"
 #include "../helpers/types.h"
 #include "constsubmatrix.h"
@@ -58,7 +59,7 @@ public:
                                          {columns_.begin, columns_.end});
         }
 
-        SubMatrix<T> GetSubMatrix(RowSlice rows, ColumnSlice columns) {
+        SubMatrix GetSubMatrix(RowSlice rows, ColumnSlice columns) {
                 assert(pmatrix_ != nullptr &&
                        "Matrix pointer is null.");
                 assert(rows_.begin + rows.begin < Rows() &&
@@ -80,7 +81,7 @@ public:
                 return columns_.end - columns_.begin + 1;
         }
 
-        SubMatrix<T> GetRow(Index row) {
+        SubMatrix GetRow(Index row) {
                 assert(pmatrix_ != nullptr &&
                        "Pointer is null");
                 assert(row > 0 && row <= Rows() &&
@@ -90,7 +91,7 @@ public:
                                  {columns_.begin, columns_.end});
         }
 
-        SubMatrix<T> GetColumn(Index column) {
+        SubMatrix GetColumn(Index column) {
                 assert(pmatrix_ != nullptr &&
                        "Pointer is null.");
                 assert(column > 0 && column <= Columns() &&
@@ -117,6 +118,7 @@ public:
                 if (norm != 0) {
                         *this /= norm;
                 }
+                RemoveZeros();
                 return *this;
         }
 
@@ -133,7 +135,7 @@ public:
         }
 
         template<class Function>
-        SubMatrix<T>& Elementwise(Function function) {
+        SubMatrix& Elementwise(Function function) {
                 for (Index i = 0; i < Rows(); i++) {
                         for (Index j = 0; j < Columns(); j++) {
                                 function((*this)(i, j));
@@ -147,6 +149,10 @@ public:
                 return ToConstSubMatrix().Elementwise(function);
         }
 
+        SubMatrix& RemoveZeros() {
+                Elementwise([](T& value) {if (Helpers::IsZero(value)) value = 0;});
+                return *this;
+        }
 
         T operator()(Index row, Index column) const {
                 assert(pmatrix_ != nullptr &&

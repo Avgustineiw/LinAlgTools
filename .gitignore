@@ -279,6 +279,7 @@ TSWLatexianTemp*
 Lectures_old/
 Figures_old/
 build/
+Latex/
 
 # Some plotting python code
 Plotting/

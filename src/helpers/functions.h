@@ -1,9 +1,18 @@
+#pragma once
+
 #include "matrix_type.h"
 
 #include "types.h"
 #include <cstdlib>
 
 namespace LinAlgTools::Helpers {
+constexpr double EPSILON = 1e-10;
+
+template<typename T>
+bool IsZero(T value) {
+        return std::abs(value) < EPSILON;
+}
+
 namespace Functions {
 using Index = Types::Index;
 
@@ -15,7 +24,7 @@ bool AreEqualMatrices(const F& lhs, const S& rhs) {
 
         for (Index i = 0; i < lhs.Rows(); i++) {
                 for (Index j = 0; j < lhs.Columns(); j++) {
-                        if (std::abs(lhs(i, j) - rhs(i, j)) > 1e-5) {
+                        if (!IsZero(lhs(i, j) - rhs(i, j))) {
                                 return false;
                         }
                 }
@@ -27,7 +36,7 @@ bool AreEqualMatrices(const F& lhs, const S& rhs) {
 template<MatrixType M>
 bool IsOrthogonal(const M& matrix) {
         for (Index row = 1; row <= matrix.Columns(); row++) {
-                if (std::abs(matrix.GetColumn(row).Get2Norm() - 1) > 1e-5) {
+                if (!IsZero(matrix.GetColumn(row).Get2Norm() - 1)) {
                         return false;
                 }
         }
@@ -39,7 +48,7 @@ template<MatrixType M>
 bool IsUpperTriangular(const M& matrix) {
         for (Index i = 0; i < matrix.Rows(); ++i) {
                 for (Index j = 0; j < i && j < matrix.Columns(); ++j) {
-                        if (std::abs(matrix(i, j)) > 1e-5) {
+                        if (!IsZero(matrix(i, j))) {
                                 return false;
                         }
                 }
