@@ -13,6 +13,11 @@ bool IsZero(T value) {
         return std::abs(value) < EPSILON;
 }
 
+template<typename T>
+int sign(T val) {
+        return (T(0) < val) - (val < T(0));
+}
+
 namespace Functions {
 using Index = Types::Index;
 
