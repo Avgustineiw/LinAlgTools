@@ -18,14 +18,12 @@ void HouseholderVectorReduction(M& vector) {
 template<Helpers::MutableMatrixType F, Helpers::MatrixType S>
 void HouseholderLeftRotation(F& matrix, const S& vector) {
         using T = F::ElementType;
-
-        matrix -= (T{2} * vector) * (vector.Transposed() * matrix);
+        matrix -= (T{2} * vector) * (vector.ConjugateTransposed() * matrix);
 }
 
 template<Helpers::MutableMatrixType F, Helpers::MatrixType S>
 void HouseholderRightRotation(F& matrix, const S& vector) {
         using T = F::ElementType;
-
-        matrix -= (matrix * vector.Transposed()) * (T{2} * vector);
+        matrix -= (matrix * vector.ConjugateTransposed()) * (T{2} * vector);
 }
 }//namespace LinAlgTools

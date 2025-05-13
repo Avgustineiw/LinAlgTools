@@ -4,6 +4,7 @@
 #include "randomgenerator.h"
 
 #include <chrono>
+#include <complex>
 #include <cstdint>
 #include <random>
 #include <gtest/gtest.h>
@@ -24,7 +25,7 @@ struct TimingResult
         size_t count = 0;
 };
 
-LinAlgTools::Tests::RandomGenerator<long double> generator(std::random_device{}());
+LinAlgTools::Tests::RandomGenerator<std::complex<long double>> generator(std::random_device{}());
 
 TimingResult CalculateStatistics(const std::vector<int64_t>& data) {
         TimingResult result;

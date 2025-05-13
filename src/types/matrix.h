@@ -1,11 +1,13 @@
 #pragma once
 
+#include "../helpers/is_complex.h"
 #include "../helpers/matrix_type.h"
 #include "../helpers/types.h"
 #include "constsubmatrix.h"
 #include "submatrix.h"
 
 #include <cassert>
+#include <complex>
 #include <initializer_list>
 #include <ostream>
 #include <utility>
@@ -111,7 +113,7 @@ public:
         }
 
         Matrix& Transpose() {
-                Matrix<T> result(Columns(), Rows());
+                Matrix result(Columns(), Rows());
                 for (Index i = 0; i < Rows(); i++) {
                         for (Index j = 0; j < Columns(); j++) {
                                 result(j, i) = (*this)(i, j);
@@ -124,6 +126,21 @@ public:
         Matrix Transposed() const {
                 return ToSubMatrix().Transposed();
         }
+
+        Matrix& ConjugateTranspose() {
+                if constexpr (Helpers::IsComplexType<T>) {
+                        Elementwise([](T& value) {
+                                value = std::conj(value);
+                        });
+                }
+                Transpose();
+                return *this;
+        }
+
+        Matrix ConjugateTransposed() const {
+                return ToSubMatrix().ConjugateTransposed();
+        }
+
 
         template<class Function>
         Matrix& Elementwise(Function function) {
@@ -271,7 +288,7 @@ Matrix<typename F::ElementType> operator*(const F& lhs, const S& rhs) {
                         result(i, j) = sum;
                 }
         }
-        
+
         result.RemoveZeros();
         return result;
 }
@@ -291,7 +308,7 @@ F& operator*=(F& lhs, const S& rhs) {
                         lhs(i, j) = result(i, j);
                 }
         }
-        
+
         lhs.RemoveZeros();
         return lhs;
 }

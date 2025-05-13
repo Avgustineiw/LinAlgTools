@@ -1,21 +1,35 @@
 #pragma once
 
+#include "is_complex.h"
 #include "matrix_type.h"
 #include "types.h"
 
+#include <cmath>
+#include <complex>
 #include <cstdlib>
 
 namespace LinAlgTools::Helpers {
 constexpr double EPSILON = 1e-10;
 
 template<typename T>
-bool IsZero(T value) {
-        return std::abs(value) < EPSILON;
+bool IsZero(const T& value) {
+        return std::norm(value) < EPSILON;
 }
 
 template<typename T>
-int sign(T val) {
-        return (T(0) < val) - (val < T(0));
+T sign(const T& value) {
+        if constexpr (IsComplexType<T>) {
+                if (IsZero(value)) {
+                        return T{1.0};
+                }
+                return value / std::sqrt(std::norm(value));
+        }
+        else {
+                if (IsZero(value)) {
+                        return T{1};
+                }
+                return value > T{0} ? T{1} : T{-1};
+        }
 }
 
 namespace Functions {

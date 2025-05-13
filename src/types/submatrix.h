@@ -70,9 +70,9 @@ public:
                        columns_.begin + columns.end <= Columns() &&
                        "Slice must be inside the matrix.");
 
-                return SubMatrix<T>(*pmatrix_,
-                                    {rows_.begin + rows.begin, rows_.begin + rows.end},
-                                    {columns_.begin + columns.begin, columns_.begin + columns.end});
+                return SubMatrix(*pmatrix_,
+                                 {rows_.begin + rows.begin, rows_.begin + rows.end},
+                                 {columns_.begin + columns.begin, columns_.begin + columns.end});
         }
 
         Index Rows() const {
@@ -125,7 +125,7 @@ public:
                        "Matrix pointer is null.");
 
                 T norm = Get2Norm();
-                if (norm != 0) {
+                if (norm != T{0}) {
                         *this /= norm;
                 }
                 RemoveZeros();
@@ -150,6 +150,34 @@ public:
                 return result;
         }
 
+        SubMatrix& ConjugateTranspose() {
+                assert(pmatrix_ != nullptr &&
+                       "Matrix pointer is null.");
+
+                if constexpr (Helpers::IsComplexType<T>) {
+                        Elementwise([](T& value) {
+                                value = std::conj(value);
+                        });
+                }
+                transposed_ = true;
+                SwapRowsColumns(rows_, columns_);
+                return *this;
+        }
+
+        Matrix<T> ConjugateTransposed() const {
+                assert(pmatrix_ != nullptr &&
+                       "Matrix pointer is null.");
+                Matrix<T> result{*this};
+                if constexpr (Helpers::IsComplexType<T>) {
+                        result.Elementwise([](T& value) {
+                                value = std::conj(value);
+                        });
+                }
+                result.Transpose();
+                return *this;
+        }
+
+
         template<class Function>
         SubMatrix& Elementwise(Function function) {
                 assert(pmatrix_ != nullptr &&
@@ -172,7 +200,11 @@ public:
                 assert(pmatrix_ != nullptr &&
                        "Matrix pointer is null.");
 
-                Elementwise([](T& value) {if (Helpers::IsZero(value)) value = 0; });
+                Elementwise([](T& value) {
+                        if (Helpers::IsZero(value)) {
+                                value = 0;
+                        };
+                });
                 return *this;
         }
 

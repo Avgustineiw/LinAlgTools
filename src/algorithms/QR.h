@@ -44,7 +44,7 @@ Implementation::PairQR<typename F::ElementType> HouseholderQR(const F& matrix) {
                 HouseholderLeftRotation(submatrixQ, vector);
         }
 
-        Q.Transpose();
+        Q.ConjugateTranspose();
         R.RemoveZeros();
         return {std::move(Q), std::move(R)};
 }

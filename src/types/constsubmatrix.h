@@ -3,9 +3,9 @@
 #include "../helpers/matrix_type.h"
 #include "../helpers/types.h"
 #include "matrix.h"
-#include "submatrix.h"
 
 #include <cassert>
+#include <complex>
 #include <cstddef>
 #include <ostream>
 
@@ -53,7 +53,7 @@ public:
                 return *this;
         }
 
-        ConstSubMatrix<T> GetConstSubMatrix(RowSlice rows, ColumnSlice columns) const {
+        ConstSubMatrix GetConstSubMatrix(RowSlice rows, ColumnSlice columns) const {
                 assert(pmatrix_ != nullptr &&
                        "Matrix pointer is null.");
                 assert(rows_.begin + rows.begin < Rows() &&
@@ -80,7 +80,7 @@ public:
                 return columns_.end - columns_.begin + 1;
         }
 
-        ConstSubMatrix<T> GetRow(Index row) const {
+        ConstSubMatrix GetRow(Index row) const {
                 assert(pmatrix_ != nullptr &&
                        "Matrix pointer is null.");
                 assert(row > 0 && row <= Rows() &&
@@ -90,7 +90,7 @@ public:
                                       {columns_.begin, columns_.end});
         }
 
-        ConstSubMatrix<T> GetColumn(Index column) const {
+        ConstSubMatrix GetColumn(Index column) const {
                 assert(pmatrix_ != nullptr &&
                        "Matrix pointer is null.");
                 assert(column > 0 && column <= Columns() &&
@@ -142,11 +142,11 @@ public:
                 assert(Rows() == 1 || Columns() == 1 &&
                                               "Incorrect size for vector norm.");
 
-                T res = T{0};
-                Elementwise([&res](const T& value) {
-                        res += value * value;
+                T result = T{0};
+                Elementwise([&result](const T& value) {
+                        result += std::norm(value);
                 });
-                return std::sqrt(res);
+                return std::sqrt(result);
         }
 
         Matrix<T> Transposed() const {
@@ -155,6 +155,15 @@ public:
 
                 Matrix<T> result{*this};
                 result.Transpose();
+                return result;
+        }
+
+        Matrix<T> ConjugateTransposed() const {
+                assert(pmatrix_ != nullptr &&
+                       "Matrix pointer is null.");
+
+                Matrix<T> result{*this};
+                result.ConjugateTranspose();
                 return result;
         }
 

@@ -1,8 +1,10 @@
 #pragma once
 
+#include "../../src/helpers/functions.h"
 #include "../../src/types/matrix.h"
 
 #include <cassert>
+#include <complex>
 #include <cstdint>
 #include <random>
 
@@ -23,6 +25,14 @@ public:
         };
 
         T GetRandomTypeValue() {
+                if constexpr (Helpers::IsComplexType<T>) {
+                        using ValueType = typename T::value_type;
+                        std::uniform_real_distribution<ValueType> real_dist(minValue_, maxValue_);
+
+                        ValueType real = real_dist(rng_);
+                        ValueType imaginary = real_dist(rng_);
+                        return T{real, imaginary};
+                }
                 return static_cast<T>(distribution_(rng_));
         }
 
@@ -32,7 +42,9 @@ public:
 
         Matrix<T> GetRandomMatrix(Index row, Index columns) {
                 Matrix<T> result(row, columns);
-                result.Elementwise([&](T& value) { value = GetRandomTypeValue(); });
+                result.Elementwise([&](T& value) {
+                        value = GetRandomTypeValue();
+                });
                 return result;
         }
 
