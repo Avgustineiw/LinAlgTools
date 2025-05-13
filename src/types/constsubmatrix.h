@@ -192,7 +192,6 @@ public:
                 return os;
         }
 
-
 private:
         const Matrix<T>* pmatrix_;
         RowSlice rows_;

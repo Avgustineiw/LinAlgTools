@@ -25,41 +25,41 @@ Implementation::GivensPair<T> CalculateGivensPair(T first, T second) {
         return {first / norm, -second / norm};
 }
 
-template<Helpers::MatrixType M>
+template<Helpers::MutableMatrixType M>
 void GivensLeftRotation(M& matrix,
-                        Index row, Index column,
+                        Index upper_row, Index lower_row,
                         typename M::ElementType first, typename M::ElementType second) {
         using T = M::ElementType;
 
         auto [cos, sin] = CalculateGivensPair(first, second);
-        for (Index i = column; i < matrix.Columns(); i++) {
-                T upper = matrix(row, i);
-                T lower = matrix(row + 1, i);
+        for (Index i = 0; i < matrix.Columns(); i++) {
+                T upper = matrix(upper_row, i);
+                T lower = matrix(lower_row, i);
                 if constexpr (Helpers::IsComplexType<T>) {
-                        matrix(row, i) = std::conj(cos) * upper - std::conj(sin) * lower;
+                        matrix(upper_row, i) = std::conj(cos) * upper - std::conj(sin) * lower;
                 }
                 else {
-                        matrix(row, i) = cos * upper - sin * lower;
+                        matrix(upper_row, i) = cos * upper - sin * lower;
                 }
-                matrix(row + 1, i) = sin * upper + cos * lower;
+                matrix(lower_row, i) = sin * upper + cos * lower;
         }
 }
 
-template<Helpers::MatrixType M>
+template<Helpers::MutableMatrixType M>
 void GivensRightRotation(M& matrix,
-                         Index column, Index row,
+                         Index left_column, Index right_column,
                          typename M::ElementType first, typename M::ElementType second) {
         using T = typename M::ElementType;
 
         auto [cos, sin] = CalculateGivensPair(first, second);
-        for (Index i = row; i < matrix.Rows(); i++) {
-                T left = matrix(i, column);
-                T right = matrix(i, column + 1);
-                matrix(i, column) = cos * left - sin * right;
+        for (Index i = 0; i < matrix.Rows(); i++) {
+                T left = matrix(i, left_column);
+                T right = matrix(i, right_column);
+                matrix(i, left_column) = cos * left - sin * right;
                 if constexpr (Helpers::IsComplexType<T>) {
-                        matrix(i, column + 1) = std::conj(sin) * left + std::conj(cos) * right;
+                        matrix(i, right_column) = std::conj(sin) * left + std::conj(cos) * right;
                 }
-                matrix(i, column + 1) = sin * left + cos * right;
+                matrix(i, right_column) = sin * left + cos * right;
         }
 }
 }//namespace LinAlgTools::Algorithm

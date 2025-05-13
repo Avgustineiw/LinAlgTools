@@ -39,7 +39,6 @@ Implementation::PairQR<typename F::ElementType> HouseholderQR(const F& matrix) {
                 SubMatrix<T> submatrixQ = Q.GetSubMatrix({column, matrix.Rows() - 1},
                                                          {0, matrix.Rows() - 1});
 
-                HouseholderVectorReduction(vector);
                 HouseholderLeftRotation(submatrixR, vector);
                 HouseholderLeftRotation(submatrixQ, vector);
         }
@@ -67,8 +66,14 @@ Implementation::PairQR<typename M::ElementType> GivensQR(const M& matrix) {
 
                         if (Helpers::IsZero(second)) continue;
 
-                        GivensLeftRotation(R, row, column, first, second);
-                        GivensRightRotation(Q, row, 0, first, second);
+                        SubMatrix<T> submatrixR = R.GetSubMatrix({0, matrix.Rows() - 1},
+                                                                 {column, matrix.Columns() - 1});
+                        SubMatrix<T> submatrixQ = Q.GetSubMatrix({0, matrix.Rows() - 1},
+                                                                 {0, matrix.Rows() - 1});
+
+
+                        GivensLeftRotation(submatrixR, row, row + 1, first, second);
+                        GivensRightRotation(submatrixQ, row, row + 1, first, second);
                 }
         }
 
