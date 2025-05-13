@@ -44,6 +44,8 @@ public:
               rows_(std::exchange(rhs.rows_, {0, 1})),
               columns_(std::exchange(rhs.columns_, {0, 1})) {};
 
+        SubMatrix(Matrix<T>&& rhs) = delete;
+
         SubMatrix& operator=(const SubMatrix& lhs) = default;
 
         SubMatrix& operator=(SubMatrix&& rhs) noexcept {
@@ -74,10 +76,15 @@ public:
         }
 
         Index Rows() const {
+                assert(pmatrix_ != nullptr &&
+                       "Matrix pointer is null.");
                 return rows_.end - rows_.begin + 1;
         }
 
         Index Columns() const {
+                assert(pmatrix_ != nullptr &&
+                       "Matrix pointer is null.");
+
                 return columns_.end - columns_.begin + 1;
         }
 
@@ -114,6 +121,9 @@ public:
         }
 
         SubMatrix& Normalize() {
+                assert(pmatrix_ != nullptr &&
+                       "Matrix pointer is null.");
+
                 T norm = Get2Norm();
                 if (norm != 0) {
                         *this /= norm;
@@ -123,12 +133,18 @@ public:
         }
 
         SubMatrix& Transpose() {
+                assert(pmatrix_ != nullptr &&
+                       "Matrix pointer is null.");
+
                 transposed_ = true;
                 SwapRowsColumns(rows_, columns_);
                 return *this;
         }
 
         Matrix<T> Transposed() const {
+                assert(pmatrix_ != nullptr &&
+                       "Matrix pointer is null.");
+
                 Matrix<T> result{*this};
                 result.Transpose();
                 return result;
@@ -136,6 +152,9 @@ public:
 
         template<class Function>
         SubMatrix& Elementwise(Function function) {
+                assert(pmatrix_ != nullptr &&
+                       "Matrix pointer is null.");
+
                 for (Index i = 0; i < Rows(); i++) {
                         for (Index j = 0; j < Columns(); j++) {
                                 function((*this)(i, j));
@@ -150,13 +169,16 @@ public:
         }
 
         SubMatrix& RemoveZeros() {
-                Elementwise([](T& value) {if (Helpers::IsZero(value)) value = 0;});
+                assert(pmatrix_ != nullptr &&
+                       "Matrix pointer is null.");
+
+                Elementwise([](T& value) {if (Helpers::IsZero(value)) value = 0; });
                 return *this;
         }
 
         T operator()(Index row, Index column) const {
                 assert(pmatrix_ != nullptr &&
-                       "Pointer is null.");
+                       "Matrix pointer is null.");
 
                 if (transposed_) {
                         return (*pmatrix_)(columns_.begin + column, rows_.begin + row);
@@ -166,7 +188,7 @@ public:
 
         T& operator()(const Index row, const Index column) {
                 assert(pmatrix_ != nullptr &&
-                       "Pointer is null.");
+                       "Matrix pointer is null.");
 
                 if (transposed_) {
                         return (*pmatrix_)(columns_.begin + column, rows_.begin + row);

@@ -40,16 +40,16 @@ void GivensLeftRotation(M& matrix,
 
 template<Helpers::MatrixType M>
 void GivensRightRotation(M& matrix,
-                         Index row, Index column,
+                         Index column, Index row,
                          typename M::ElementType first, typename M::ElementType second) {
-        using T = M::ElementType;
+        using T = typename M::ElementType;
 
         auto [cos, sin] = CalculateGivensPair(first, second);
-        for (Index i = 0; i < matrix.Rows(); i++) {
-                T left = matrix(i, row);
-                T right = matrix(i, row + 1);
-                matrix(i, row) = cos * left - sin * right;
-                matrix(i, row + 1) = sin * left + cos * right;
+        for (Index i = row; i < matrix.Rows(); i++) {
+                T left = matrix(i, column);
+                T right = matrix(i, column + 1);
+                matrix(i, column) = cos * left - sin * right;
+                matrix(i, column + 1) = sin * left + cos * right;
         }
 }
 }//namespace LinAlgTools::Algorithm

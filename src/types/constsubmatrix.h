@@ -42,6 +42,8 @@ public:
               rows_(std::exchange(rhs.rows_, {0, 1})),
               columns_(std::exchange(rhs.columns_, {0, 1})) {};
 
+        ConstSubMatrix(Matrix<T>&& rhs) = delete;
+
         ConstSubMatrix& operator=(const ConstSubMatrix& lhs) = default;
 
         ConstSubMatrix& operator=(ConstSubMatrix&& rhs) noexcept {
@@ -51,8 +53,9 @@ public:
                 return *this;
         }
 
-        SubMatrix<T> GetConstSubMatrix(RowSlice rows, ColumnSlice columns) const {
-                assert(pmatrix_ != nullptr && "Matrix pointer is null.");
+        ConstSubMatrix<T> GetConstSubMatrix(RowSlice rows, ColumnSlice columns) const {
+                assert(pmatrix_ != nullptr &&
+                       "Matrix pointer is null.");
                 assert(rows_.begin + rows.begin < Rows() &&
                        rows_.begin + rows.end <= Rows() &&
                        columns_.begin + columns.begin < Columns() &&
@@ -66,16 +69,20 @@ public:
 
 
         Index Rows() const {
+                assert(pmatrix_ != nullptr &&
+                       "Matrix pointer is null.");
                 return rows_.end - rows_.begin + 1;
         }
 
         Index Columns() const {
+                assert(pmatrix_ != nullptr &&
+                       "Matrix pointer is null.");
                 return columns_.end - columns_.begin + 1;
         }
 
         ConstSubMatrix<T> GetRow(Index row) const {
                 assert(pmatrix_ != nullptr &&
-                       "Pointer is null.");
+                       "Matrix pointer is null.");
                 assert(row > 0 && row <= Rows() &&
                        "Incorrect row index.");
                 return ConstSubMatrix(*pmatrix_,
@@ -85,7 +92,7 @@ public:
 
         ConstSubMatrix<T> GetColumn(Index column) const {
                 assert(pmatrix_ != nullptr &&
-                       "Pointer is null.");
+                       "Matrix pointer is null.");
                 assert(column > 0 && column <= Columns() &&
                        "Incorrect column index.");
                 return ConstSubMatrix(*pmatrix_,
@@ -95,6 +102,8 @@ public:
 
         template<class Function>
         const ConstSubMatrix& Elementwise(Function function) const {
+                assert(pmatrix_ != nullptr &&
+                       "Matrix pointer is null.");
                 for (Index i = 0; i < Rows(); i++) {
                         for (Index j = 0; j < Columns(); j++) {
                                 function((*this)(i, j));
@@ -104,6 +113,9 @@ public:
         }
 
         Matrix<T> Diagonal() const {
+                assert(pmatrix_ != nullptr &&
+                       "Matrix pointer is null.");
+
                 const Index size = std::min(Rows(), Columns());
                 Matrix<T> result(size, 1);
                 for (Index i = 0; i < size; i++) {
@@ -113,6 +125,9 @@ public:
         }
 
         T Trace() const {
+                assert(pmatrix_ != nullptr &&
+                       "Matrix pointer is null.");
+
                 T result = 0;
                 const Index size = std::min(Rows(), Columns());
                 for (Index i = 0; i < size; i++) {
@@ -122,6 +137,8 @@ public:
         }
 
         T Get2Norm() const {
+                assert(pmatrix_ != nullptr &&
+                       "Matrix pointer is null.");
                 assert(Rows() == 1 || Columns() == 1 &&
                                               "Incorrect size for vector norm.");
 
@@ -133,6 +150,9 @@ public:
         }
 
         Matrix<T> Transposed() const {
+                assert(pmatrix_ != nullptr &&
+                       "Matrix pointer is null.");
+
                 Matrix<T> result{*this};
                 result.Transpose();
                 return result;
@@ -140,7 +160,7 @@ public:
 
         T operator()(Index row, Index column) const {
                 assert(pmatrix_ != nullptr &&
-                       "Pointer is null.");
+                       "Matrix pointer is null.");
                 return (*pmatrix_)(rows_.begin + row, columns_.begin + column);
         }
 

@@ -3,6 +3,8 @@
 #include "../helpers/functions.h"
 #include "../helpers/matrix_type.h"
 
+#include <cassert>
+
 namespace LinAlgTools {
 template<Helpers::MutableMatrixType M>
 void HouseholderVectorReduction(M& vector) {

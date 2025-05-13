@@ -1,8 +1,8 @@
 #pragma once
 
 #include "matrix_type.h"
-
 #include "types.h"
+
 #include <cstdlib>
 
 namespace LinAlgTools::Helpers {

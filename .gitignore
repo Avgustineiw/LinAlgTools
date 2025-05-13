@@ -289,3 +289,5 @@ notes.txt
 # Ignore compiled file
 # Lectures.pdf
 .DS_Store
+main
+*.cpp

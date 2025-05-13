@@ -1,4 +1,5 @@
 #include "../src/types/matrix.h"
+
 #include <gtest/gtest.h>
 
 using namespace LinAlgTools;

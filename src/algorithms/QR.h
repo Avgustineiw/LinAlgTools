@@ -20,7 +20,7 @@ struct PairQR
 using Index = Helpers::Types::Index;
 
 template<Helpers::MatrixType F>
-Implementation::PairQR<typename F::ElementType> QR_Householder(const F& matrix) {
+Implementation::PairQR<typename F::ElementType> HouseholderQR(const F& matrix) {
         using T = F::ElementType;
 
         if (Helpers::Functions::IsUpperTriangular(matrix)) {
@@ -50,7 +50,7 @@ Implementation::PairQR<typename F::ElementType> QR_Householder(const F& matrix) 
 }
 
 template<Helpers::MatrixType M>
-Implementation::PairQR<typename M::ElementType> QR_Givens(const M& matrix) {
+Implementation::PairQR<typename M::ElementType> GivensQR(const M& matrix) {
         using T = typename M::ElementType;
 
         if (Helpers::Functions::IsUpperTriangular(matrix)) {
@@ -68,7 +68,7 @@ Implementation::PairQR<typename M::ElementType> QR_Givens(const M& matrix) {
                         if (Helpers::IsZero(second)) continue;
 
                         GivensLeftRotation(R, row, column, first, second);
-                        GivensRightRotation(Q, row, column, first, second);
+                        GivensRightRotation(Q, row, 0, first, second);
                 }
         }
 
