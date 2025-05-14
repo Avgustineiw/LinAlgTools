@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../../src/algorithms/QR.h"
-#include "randomgenerator.h"
+#include "../../src/algorithms/qr_decomposition.h"
+#include "random_generator.h"
 
 #include <chrono>
 #include <complex>
@@ -9,7 +9,7 @@
 #include <random>
 #include <gtest/gtest.h>
 
-namespace LinAlgTools::Tests::Implementation {
+namespace LinAlgTools::Tests::Utils {
 enum class QRMethod
 {
         Householder,
@@ -93,4 +93,4 @@ TimingResult GetQRTimingStatistics(int32_t size, int32_t iterations, QRMethod me
 
         return CalculateStatistics(data);
 }
-} //namespace LinAlgTools::Tests::Implementation
+} //namespace LinAlgTools::Tests::Utils

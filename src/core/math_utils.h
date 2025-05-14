@@ -1,14 +1,16 @@
 #pragma once
 
+#include "indices.h"
 #include "is_complex.h"
-#include "matrix_type.h"
-#include "types.h"
+#include "matrix_traits.h"
 
 #include <cmath>
 #include <complex>
 #include <cstdlib>
 
-namespace LinAlgTools::Helpers {
+namespace LinAlgTools::Core {
+using Index = Indices::Index;
+
 constexpr double EPSILON = 1e-10;
 
 template<typename T>
@@ -31,9 +33,6 @@ T sign(const T& value) {
                 return value > T{0} ? T{1} : T{-1};
         }
 }
-
-namespace Functions {
-using Index = Types::Index;
 
 template<MatrixType F, MatrixType S>
 bool AreEqualMatrices(const F& lhs, const S& rhs) {
@@ -74,5 +73,4 @@ bool IsUpperTriangular(const M& matrix) {
         }
         return true;
 }
-}//namespace Functions
-}//namespace LinAlgTools::Helpers
+}// namespace LinAlgTools::Core

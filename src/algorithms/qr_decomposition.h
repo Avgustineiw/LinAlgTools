@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../helpers/functions.h"
+#include "../core/math_utils.h"
 #include "../types/matrix.h"
-#include "../types/submatrix.h"
+#include "../types/sub_matrix.h"
 #include "givens.h"
 #include "householder.h"
 
@@ -17,13 +17,13 @@ struct PairQR
         Matrix<T> R;
 };
 }//namespace Implementation
-using Index = Helpers::Types::Index;
+using Index = Core::Indices::Index;
 
-template<Helpers::MatrixType F>
+template<Core::MatrixType F>
 Implementation::PairQR<typename F::ElementType> HouseholderQR(const F& matrix) {
         using T = F::ElementType;
 
-        if (Helpers::Functions::IsUpperTriangular(matrix)) {
+        if (Core::IsUpperTriangular(matrix)) {
                 return {std::move(Matrix<T>::Identity(matrix.Rows())), std::move(matrix)};
         }
 
@@ -48,11 +48,11 @@ Implementation::PairQR<typename F::ElementType> HouseholderQR(const F& matrix) {
         return {std::move(Q), std::move(R)};
 }
 
-template<Helpers::MatrixType M>
+template<Core::MatrixType M>
 Implementation::PairQR<typename M::ElementType> GivensQR(const M& matrix) {
         using T = typename M::ElementType;
 
-        if (Helpers::Functions::IsUpperTriangular(matrix)) {
+        if (Core::IsUpperTriangular(matrix)) {
                 return {std::move(Matrix<T>::Identity(matrix.Rows())), std::move(matrix)};
         }
 
@@ -64,7 +64,7 @@ Implementation::PairQR<typename M::ElementType> GivensQR(const M& matrix) {
                         T first = R(row, column);
                         T second = R(row + 1, column);
 
-                        if (Helpers::IsZero(second)) continue;
+                        if (Core::IsZero(second)) continue;
 
                         SubMatrix<T> submatrixR = R.GetSubMatrix({0, matrix.Rows() - 1},
                                                                  {column, matrix.Columns() - 1});

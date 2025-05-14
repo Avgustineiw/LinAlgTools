@@ -1,10 +1,10 @@
 #pragma once
 
-#include "../helpers/is_complex.h"
-#include "../helpers/matrix_type.h"
-#include "../helpers/types.h"
-#include "constsubmatrix.h"
-#include "submatrix.h"
+#include "../core/indices.h"
+#include "../core/is_complex.h"
+#include "../core/matrix_traits.h"
+#include "const_sub_matrix.h"
+#include "sub_matrix.h"
 
 #include <cassert>
 #include <complex>
@@ -14,11 +14,12 @@
 #include <vector>
 
 namespace LinAlgTools {
+using Index = Core::Indices::Index;
+
 template<typename T>
 class Matrix {
-        using Index = Helpers::Types::Index;
-        using RowSlice = Helpers::Types::RowSlice;
-        using ColumnSlice = Helpers::Types::ColumnSlice;
+        using RowSlice = Core::Indices::RowSlice;
+        using ColumnSlice = Core::Indices::ColumnSlice;
 
 public:
         using ElementType = std::remove_cv_t<T>;
@@ -128,7 +129,7 @@ public:
         }
 
         Matrix& ConjugateTranspose() {
-                if constexpr (Helpers::IsComplexType<T>) {
+                if constexpr (Core::IsComplexType<T>) {
                         Elementwise([](T& value) {
                                 value = std::conj(value);
                         });
@@ -206,9 +207,7 @@ private:
         std::vector<T> data_;
 };
 
-using Index = Helpers::Types::Index;
-
-template<Helpers::MatrixType F, Helpers::MatrixType S>
+template<Core::MatrixType F, Core::MatrixType S>
 Matrix<typename F::ElementType> operator+(const F& lhs, const S& rhs) {
         using T = typename F::ElementType;
 
@@ -225,7 +224,7 @@ Matrix<typename F::ElementType> operator+(const F& lhs, const S& rhs) {
         return result;
 }
 
-template<Helpers::MutableMatrixType F, Helpers::MatrixType S>
+template<Core::MutableMatrixType F, Core::MatrixType S>
 F& operator+=(F& lhs, const S& rhs) {
         assert(lhs.Rows() == rhs.Rows() && lhs.Columns() == rhs.Columns() &&
                "Matrices must have the same size for sum.");
@@ -239,7 +238,7 @@ F& operator+=(F& lhs, const S& rhs) {
         return lhs;
 }
 
-template<Helpers::MatrixType F, Helpers::MatrixType S>
+template<Core::MatrixType F, Core::MatrixType S>
 Matrix<typename F::ElementType> operator-(const F& lhs, const S& rhs) {
         using T = typename F::ElementType;
 
@@ -256,7 +255,7 @@ Matrix<typename F::ElementType> operator-(const F& lhs, const S& rhs) {
         return result;
 }
 
-template<Helpers::MutableMatrixType F, Helpers::MatrixType S>
+template<Core::MutableMatrixType F, Core::MatrixType S>
 F& operator-=(F& lhs, const S& rhs) {
         assert(lhs.Rows() == rhs.Rows() && lhs.Columns() == rhs.Columns() &&
                "Matrices must have the same size for sum.");
@@ -270,7 +269,7 @@ F& operator-=(F& lhs, const S& rhs) {
         return lhs;
 }
 
-template<Helpers::MatrixType F, Helpers::MatrixType S>
+template<Core::MatrixType F, Core::MatrixType S>
 Matrix<typename F::ElementType> operator*(const F& lhs, const S& rhs) {
         using T = typename F::ElementType;
 
@@ -293,7 +292,7 @@ Matrix<typename F::ElementType> operator*(const F& lhs, const S& rhs) {
         return result;
 }
 
-template<Helpers::MutableMatrixType F, Helpers::MatrixType S>
+template<Core::MutableMatrixType F, Core::MatrixType S>
 F& operator*=(F& lhs, const S& rhs) {
         if (lhs.Rows() == 0 || rhs.Rows() == 0) {
                 return lhs;
@@ -313,7 +312,7 @@ F& operator*=(F& lhs, const S& rhs) {
         return lhs;
 }
 
-template<Helpers::MatrixType F>
+template<Core::MatrixType F>
 Matrix<typename F::ElementType> operator*(const F& lhs, typename F::ElementType scalar) {
         using T = typename F::ElementType;
         Matrix<T> result = lhs;
@@ -328,12 +327,12 @@ Matrix<typename F::ElementType> operator*(const F& lhs, typename F::ElementType 
         return result;
 }
 
-template<Helpers::MatrixType F>
+template<Core::MatrixType F>
 Matrix<typename F::ElementType> operator*(typename F::ElementType scalar, const F& rhs) {
         return rhs * scalar;
 }
 
-template<Helpers::MutableMatrixType F>
+template<Core::MutableMatrixType F>
 F& operator*=(F& lhs, typename F::ElementType scalar) {
         for (Index i = 0; i < lhs.Rows(); i++) {
                 for (Index j = 0; j < lhs.Columns(); j++) {
@@ -345,7 +344,7 @@ F& operator*=(F& lhs, typename F::ElementType scalar) {
         return lhs;
 }
 
-template<Helpers::MatrixType F>
+template<Core::MatrixType F>
 Matrix<typename F::ElementType> operator/(const F& lhs, typename F::ElementType scalar) {
         using T = typename F::ElementType;
         Matrix<T> result = lhs;
@@ -360,12 +359,12 @@ Matrix<typename F::ElementType> operator/(const F& lhs, typename F::ElementType 
         return result;
 }
 
-template<Helpers::MatrixType F>
+template<Core::MatrixType F>
 Matrix<typename F::ElementType> operator/(typename F::ElementType scalar, const F& rhs) {
         return rhs / scalar;
 }
 
-template<Helpers::MutableMatrixType F>
+template<Core::MutableMatrixType F>
 F& operator/=(F& lhs, typename F::ElementType scalar) {
         for (Index i = 0; i < lhs.Rows(); i++) {
                 for (Index j = 0; j < lhs.Columns(); j++) {
@@ -377,7 +376,7 @@ F& operator/=(F& lhs, typename F::ElementType scalar) {
         return lhs;
 }
 
-template<Helpers::MatrixType F, Helpers::MatrixType S>
+template<Core::MatrixType F, Core::MatrixType S>
 bool operator==(const F& lhs, const S& rhs) {
         if (lhs.Rows() != rhs.Rows() || lhs.Columns() != rhs.Columns()) {
                 return false;
@@ -394,7 +393,7 @@ bool operator==(const F& lhs, const S& rhs) {
         return true;
 }
 
-template<Helpers::MatrixType F, Helpers::MatrixType S>
+template<Core::MatrixType F, Core::MatrixType S>
 bool operator!=(const F& lhs, const S& rhs) {
         return !(lhs == rhs);
 }

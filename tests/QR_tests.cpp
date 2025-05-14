@@ -1,15 +1,16 @@
-#include "../src/algorithms/QR.h"
-#include "../src/helpers/functions.h"
+#include "../src/algorithms/qr_decomposition.h"
+#include "../src/core/math_utils.h"
+#include "../src/core/matrix_traits.h"
 #include "../src/types/matrix.h"
+
 #include <gtest/gtest.h>
 
+using namespace LinAlgTools;
+using namespace LinAlgTools::Core;
 using namespace LinAlgTools::Algorithm;
-using namespace LinAlgTools::Helpers;
-using namespace LinAlgTools::Helpers::Functions;
 
 template<typename T = double>
-using Matrix = LinAlgTools::Matrix<T>;
-using Index = LinAlgTools::Helpers::Types::Index;
+using Index = Core::Indices::Index;
 
 template<MatrixType M, MatrixType F, MatrixType S>
 bool CheckQR(const M& matrix, const F& Q, const S& R) {

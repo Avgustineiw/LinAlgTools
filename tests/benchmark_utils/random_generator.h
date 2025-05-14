@@ -1,17 +1,15 @@
 #pragma once
 
-#include "../../src/helpers/functions.h"
 #include "../../src/types/matrix.h"
 
 #include <cassert>
-#include <complex>
 #include <cstdint>
 #include <random>
 
 namespace LinAlgTools::Tests {
 template<typename T>
 class RandomGenerator {
-        using Index = Helpers::Types::Index;
+        using Index = Core::Indices::Index;
 
 public:
         RandomGenerator(int32_t seed, int32_t minValue = INT32_MIN, int32_t maxValue = INT32_MAX)
@@ -25,7 +23,7 @@ public:
         };
 
         T GetRandomTypeValue() {
-                if constexpr (Helpers::IsComplexType<T>) {
+                if constexpr (Core::IsComplexType<T>) {
                         using ValueType = typename T::value_type;
                         std::uniform_real_distribution<ValueType> real_dist(minValue_, maxValue_);
 

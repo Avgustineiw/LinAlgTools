@@ -3,8 +3,8 @@
 #include <cstddef>
 #include <cstdint>
 
-namespace LinAlgTools::Helpers {
-struct Types
+namespace LinAlgTools::Core {
+struct Indices 
 {
         using Index = int64_t;
 
@@ -19,4 +19,4 @@ struct Types
                 Index end = -1;
         };
 };
-}// namespace LinAlgTools::Helpers
+}// namespace LinAlgTools::Core

@@ -1,9 +1,9 @@
 #pragma once
 
-#include "../helpers/functions.h"
-#include "../helpers/matrix_type.h"
-#include "../helpers/types.h"
-#include "constsubmatrix.h"
+#include "../core/math_utils.h"
+#include "../core/matrix_traits.h"
+#include "../core/indices.h"
+#include "const_sub_matrix.h"
 #include "matrix.h"
 
 #include <cassert>
@@ -14,9 +14,9 @@
 namespace LinAlgTools {
 template<typename T>
 class SubMatrix {
-        using Index = Helpers::Types::Index;
-        using RowSlice = Helpers::Types::RowSlice;
-        using ColumnSlice = Helpers::Types::ColumnSlice;
+        using Index = Core::Indices::Index;
+        using RowSlice = Core::Indices::RowSlice;
+        using ColumnSlice = Core::Indices::ColumnSlice;
 
 public:
         using ElementType = std::remove_cv_t<T>;
@@ -154,7 +154,7 @@ public:
                 assert(pmatrix_ != nullptr &&
                        "Matrix pointer is null.");
 
-                if constexpr (Helpers::IsComplexType<T>) {
+                if constexpr (Core::IsComplexType<T>) {
                         Elementwise([](T& value) {
                                 value = std::conj(value);
                         });
@@ -168,7 +168,7 @@ public:
                 assert(pmatrix_ != nullptr &&
                        "Matrix pointer is null.");
                 Matrix<T> result{*this};
-                if constexpr (Helpers::IsComplexType<T>) {
+                if constexpr (Core::IsComplexType<T>) {
                         result.Elementwise([](T& value) {
                                 value = std::conj(value);
                         });
@@ -201,7 +201,7 @@ public:
                        "Matrix pointer is null.");
 
                 Elementwise([](T& value) {
-                        if (Helpers::IsZero(value)) {
+                        if (Core::IsZero(value)) {
                                 value = 0;
                         };
                 });

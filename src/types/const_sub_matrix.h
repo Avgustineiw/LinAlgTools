@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../helpers/matrix_type.h"
-#include "../helpers/types.h"
+#include "../core/matrix_traits.h"
+#include "../core/indices.h"
 #include "matrix.h"
 
 #include <cassert>
@@ -12,9 +12,9 @@
 namespace LinAlgTools {
 template<typename T>
 class ConstSubMatrix {
-        using Index = Helpers::Types::Index;
-        using RowSlice = Helpers::Types::RowSlice;
-        using ColumnSlice = Helpers::Types::ColumnSlice;
+        using Index = Core::Indices::Index;
+        using RowSlice = Core::Indices::RowSlice;
+        using ColumnSlice = Core::Indices::ColumnSlice;
 
 public:
         using ElementType = std::remove_cv_t<T>;
@@ -66,7 +66,6 @@ public:
                                          {rows_.begin + rows.begin, rows_.begin + rows.end},
                                          {columns_.begin + columns.begin, columns_.begin + columns.end});
         }
-
 
         Index Rows() const {
                 assert(pmatrix_ != nullptr &&
@@ -172,7 +171,6 @@ public:
                        "Matrix pointer is null.");
                 return (*pmatrix_)(rows_.begin + row, columns_.begin + column);
         }
-
 
         friend std::ostream& operator<<(std::ostream& os, const ConstSubMatrix& matrix) {
                 for (Index i = 0; i < matrix.Rows(); i++) {
