@@ -6,7 +6,6 @@
 #include <chrono>
 #include <complex>
 #include <cstdint>
-#include <random>
 #include <gtest/gtest.h>
 
 namespace LinAlgTools::Tests::Utils {
@@ -24,8 +23,6 @@ struct TimingResult
         double stddev = 0.0;
         size_t count = 0;
 };
-
-LinAlgTools::Tests::RandomGenerator<std::complex<long double>> generator(std::random_device{}());
 
 TimingResult CalculateStatistics(const std::vector<int64_t>& data) {
         TimingResult result;
@@ -58,7 +55,9 @@ TimingResult CalculateStatistics(const std::vector<int64_t>& data) {
         return result;
 }
 
-TimingResult GetQRTimingStatistics(int32_t size, int32_t iterations, QRMethod method = QRMethod::Householder) {
+TimingResult GetQRTimingStatistics(int32_t size, int32_t iterations,
+                                   QRMethod method,
+                                   RandomGenerator<std::complex<long double>> generator) {
         using Clock = std::chrono::high_resolution_clock;
         using Ms = std::chrono::milliseconds;
 

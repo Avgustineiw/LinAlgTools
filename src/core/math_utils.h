@@ -19,17 +19,15 @@ bool IsZero(const T& value) {
 }
 
 template<typename T>
-T sign(const T& value) {
+T sign(T value) {
+        if (IsZero(value)) {
+                return T{1};
+        }
+
         if constexpr (IsComplexType<T>) {
-                if (IsZero(value)) {
-                        return T{1.0};
-                }
                 return value / std::sqrt(std::norm(value));
         }
         else {
-                if (IsZero(value)) {
-                        return T{1};
-                }
                 return value > T{0} ? T{1} : T{-1};
         }
 }

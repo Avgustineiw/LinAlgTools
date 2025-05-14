@@ -290,4 +290,4 @@ notes.txt
 # Lectures.pdf
 .DS_Store
 main
-*.cpp
+main.cpp
