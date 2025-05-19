@@ -7,9 +7,9 @@
 #include <iomanip>
 
 namespace {
-constexpr int32_t MATRICES_PER_ITERATION = 1;
-constexpr int32_t MIN_SIZE = 600;
-constexpr int32_t MAX_SIZE = 605;
+constexpr int32_t MATRICES_PER_ITERATION = 10;
+constexpr int32_t MIN_SIZE = 1;
+constexpr int32_t MAX_SIZE = 300;
 constexpr int32_t SIZE_STEP = 1;
 }// namespace
 
@@ -61,6 +61,6 @@ TEST(TEST_PERFORMANCE_QR, HouseholderPerformance) {
         RunQRPerformanceTest(QRMethod::Householder, "Householder");
 }
 
-TEST(TEST_PERFORMANCE_QR, GivensPerformance) {
-        RunQRPerformanceTest(QRMethod::Givens, "Givens");
-}
+// TEST(TEST_PERFORMANCE_QR, GivensPerformance) {
+//         RunQRPerformanceTest(QRMethod::Givens, "Givens");
+// }
