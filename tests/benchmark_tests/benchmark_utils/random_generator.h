@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../src/types/matrix.h"
+#include "../../../src/types/matrix.h"
 
 #include <cassert>
 #include <cstdint>
@@ -20,6 +20,8 @@ public:
                        "Incorrect minimum value overflow.");
                 assert(maxValue >= INT32_MIN && maxValue_ <= INT32_MAX &&
                        "Incorrect maximum value overflow.");
+                assert(minValue <= maxValue &&
+                       "Invalid range");
         };
 
         T GetRandomTypeValue() {
@@ -34,15 +36,47 @@ public:
                 return static_cast<T>(distribution_(rng_));
         }
 
-        Matrix<T> GetRandomMatrix(Index size) {
-                return GetRandomMatrix(size, size);
+        int32_t GetRandomInt(int32_t from, int32_t to) {
+                assert(from <= to &&
+                       "Invalid range: from must be less than or equal to to");
+                std::uniform_int_distribution<int32_t> dist(from, to);
+                return dist(rng_);
         }
 
-        Matrix<T> GetRandomMatrix(Index row, Index columns) {
+        Matrix<T> GetRandomDenseMatrix(Index size) {
+                return GetRandomDenseMatrix(size, size);
+        }
+
+        Matrix<T> GetRandomDenseMatrix(Index row, Index columns) {
                 Matrix<T> result(row, columns);
                 result.Elementwise([&](T& value) {
                         value = GetRandomTypeValue();
                 });
+                return result;
+        }
+
+        Matrix<T> GetRandomSparseMatrix(Index size, double density = 0.1) {
+                return GetRandomSparseMatrix(size, size, density);
+        }
+
+        Matrix<T> GetRandomSparseMatrix(Index rows, Index cols, double density = 0.1) {
+                assert(density >= 0.0 && density <= 1.0 &&
+                       "Density must be between 0.0 and 1.0");
+                Matrix<T> result(rows, cols);
+
+                Index total_elements = rows * cols;
+                Index non_zero_elements = static_cast<size_t>(total_elements * density);
+
+                if (density > 0.0 && non_zero_elements == 0) {
+                        non_zero_elements = 1;
+                }
+
+                for (size_t i = 0; i < non_zero_elements; ++i) {
+                        Index row = static_cast<Index>(GetRandomInt(0, rows - 1));
+                        Index col = static_cast<Index>(GetRandomInt(0, cols - 1));
+                        result(row, col) = GetRandomTypeValue();
+                }
+
                 return result;
         }
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../src/algorithms/qr_decomposition.h"
+#include "../../../src/algorithms/qr_decomposition.h"
 #include "random_generator.h"
 
 #include <chrono>
@@ -64,7 +64,7 @@ TimingResult GetQRTimingStatistics(int32_t size, int32_t iterations,
         std::vector<int64_t> data;
 
         for (int i = 0; i < iterations; i++) {
-                auto matrix = generator.GetRandomMatrix(size);
+                auto matrix = generator.GetRandomSparseMatrix(size);
 
                 Clock::time_point start;
                 Clock::time_point end;

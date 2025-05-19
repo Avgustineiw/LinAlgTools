@@ -15,7 +15,7 @@ constexpr double EPSILON = 1e-10;
 
 template<typename T>
 bool IsZero(const T& value) {
-        return std::norm(value) < EPSILON;
+        return std::norm(value) <= EPSILON;
 }
 
 template<typename T>

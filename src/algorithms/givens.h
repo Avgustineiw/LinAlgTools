@@ -19,7 +19,7 @@ struct GivensPair
 using Index = Core::Indices::Index;
 
 template<typename T>
-Implementation::GivensPair<T> CalculateGivensPair(T first, T second) {
+Implementation::GivensPair<T> GetGivensPair(T first, T second) {
         T norm = std::sqrt(std::norm(first) + std::norm(second));
         if (Core::IsZero(norm)) {
                 return {T{1}, T{0}};
@@ -33,7 +33,7 @@ void GivensLeftRotation(M& matrix,
                         typename M::ElementType first, typename M::ElementType second) {
         using T = M::ElementType;
 
-        auto [cos, sin] = CalculateGivensPair(first, second);
+        auto [cos, sin] = GetGivensPair(first, second);
         for (Index i = 0; i < matrix.Columns(); i++) {
                 T upper = matrix(upper_row, i);
                 T lower = matrix(lower_row, i);
@@ -54,7 +54,7 @@ void GivensRightRotation(M& matrix,
                          typename M::ElementType first, typename M::ElementType second) {
         using T = typename M::ElementType;
 
-        auto [cos, sin] = CalculateGivensPair(first, second);
+        auto [cos, sin] = GetGivensPair(first, second);
         for (Index i = 0; i < matrix.Rows(); i++) {
                 T left = matrix(i, left_column);
                 T right = matrix(i, right_column);

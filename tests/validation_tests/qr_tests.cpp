@@ -1,7 +1,7 @@
-#include "../src/algorithms/qr_decomposition.h"
-#include "../src/core/math_utils.h"
-#include "../src/core/matrix_traits.h"
-#include "../src/types/matrix.h"
+#include "../../src/algorithms/qr_decomposition.h"
+#include "../../src/core/math_utils.h"
+#include "../../src/core/matrix_traits.h"
+#include "../../src/types/matrix.h"
 
 #include <gtest/gtest.h>
 
