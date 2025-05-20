@@ -6,6 +6,7 @@
 
 #include <cassert>
 
+//Специально делаю это функцию не in-place. Но, возможно, это не очень хорошее решение. Что думаешь?
 namespace LinAlgTools::Algorithm {
 template<Core::MatrixType M>
 Matrix<typename M::ElementType> HouseholderVectorReduction(const M& vector) {
@@ -15,7 +16,7 @@ Matrix<typename M::ElementType> HouseholderVectorReduction(const M& vector) {
         auto result = vector;
         result(0, 0) -= Core::sign(vector(0, 0)) * vector.Get2Norm();
         result.Normalize();
-        return result;
+        return {std::move(result)};
 }
 
 template<Core::MutableMatrixType F, Core::MatrixType S>
