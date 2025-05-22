@@ -33,3 +33,4 @@ void HouseholderRightRotation(F& matrix, const S& vector) {
         matrix -= (matrix * reduced_vector.ConjugateTransposed()) * (T{2} * reduced_vector);
 }
 }//namespace LinAlgTools::Algorithm
+

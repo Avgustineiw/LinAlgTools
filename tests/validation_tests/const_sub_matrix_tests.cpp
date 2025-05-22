@@ -1,5 +1,5 @@
-#include "../src/types/const_sub_matrix.h"
-#include "../src/types/matrix.h"
+#include "../../src/types/const_sub_matrix.h"
+#include "../../src/types/matrix.h"
 
 #include <gtest/gtest.h>
 
@@ -53,3 +53,4 @@ TEST(TEST_CONST_SUBMATRIX, TransposedView) {
 
         EXPECT_EQ(transposed(2, 1), 6);
 }
+

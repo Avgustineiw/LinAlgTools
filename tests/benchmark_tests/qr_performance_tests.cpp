@@ -61,6 +61,7 @@ TEST(TEST_PERFORMANCE_QR, HouseholderPerformance) {
         RunQRPerformanceTest(QRMethod::Householder, "Householder");
 }
 
-// TEST(TEST_PERFORMANCE_QR, GivensPerformance) {
-//         RunQRPerformanceTest(QRMethod::Givens, "Givens");
-// }
+TEST(TEST_PERFORMANCE_QR, GivensPerformance) {
+        RunQRPerformanceTest(QRMethod::Givens, "Givens");
+}
+

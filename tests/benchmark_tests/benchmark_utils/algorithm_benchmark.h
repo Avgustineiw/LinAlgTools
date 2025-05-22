@@ -93,3 +93,4 @@ TimingResult GetQRTimingStatistics(int32_t size, int32_t iterations,
         return CalculateStatistics(data);
 }
 } //namespace LinAlgTools::Tests::Utils
+

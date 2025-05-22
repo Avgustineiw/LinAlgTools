@@ -126,3 +126,4 @@ TEST(TEST_QR_DECOMPOSITION, GivensAlreadyUpperTriangular) {
 
         EXPECT_TRUE(CheckQR(A, Q, R)) << "QR does not reconstruct original matrix.";
 }
+

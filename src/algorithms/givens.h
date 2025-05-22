@@ -69,3 +69,4 @@ void GivensRightRotation(M& matrix,
         }
 }
 }//namespace LinAlgTools::Algorithm
+

@@ -197,3 +197,4 @@ private:
         bool transposed_ = false;
 };
 }//namespace LinAlgTools
+

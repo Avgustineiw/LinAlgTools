@@ -87,3 +87,4 @@ private:
         std::uniform_int_distribution<int32_t> distribution_;
 };
 }// namespace LinAlgTools::Tests
+

@@ -398,3 +398,4 @@ bool operator!=(const F& lhs, const S& rhs) {
         return !(lhs == rhs);
 }
 }//namespace LinAlgTools
+

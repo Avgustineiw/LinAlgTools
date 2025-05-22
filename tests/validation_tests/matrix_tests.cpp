@@ -1,4 +1,4 @@
-#include "../src/types/matrix.h"
+#include "../../src/types/matrix.h"
 
 #include <gtest/gtest.h>
 
@@ -182,3 +182,4 @@ TEST(TEST_MATRIX, EdgeCases) {
         EXPECT_EQ(col.Rows(), 3);
         EXPECT_EQ(col.Columns(), 1);
 }
+

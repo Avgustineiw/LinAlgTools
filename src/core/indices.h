@@ -20,3 +20,4 @@ struct Indices
         };
 };
 }// namespace LinAlgTools::Core
+

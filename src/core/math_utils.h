@@ -72,3 +72,4 @@ bool IsUpperTriangular(const M& matrix) {
         return true;
 }
 }// namespace LinAlgTools::Core
+

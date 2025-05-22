@@ -1,5 +1,5 @@
-#include "../src/types/matrix.h"
-#include "../src/types/sub_matrix.h"
+#include "../../src/types/matrix.h"
+#include "../../src/types/sub_matrix.h"
 
 #include <gtest/gtest.h>
 
@@ -91,3 +91,4 @@ TEST(TEST_SUBMATRIX, MoveOperations) {
         EXPECT_EQ(moved.Rows(), 2);
         EXPECT_EQ(moved(0, 0), 1);
 }
+

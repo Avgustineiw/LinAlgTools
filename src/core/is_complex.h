@@ -15,3 +15,4 @@ struct IsComplexType<std::complex<T>> : std::true_type{};
 template<typename T>
 constexpr bool IsComplexType = Implementation::IsComplexType<std::remove_cv_t<T>>::value;
 }// namespace LinAlgTools::Core
+

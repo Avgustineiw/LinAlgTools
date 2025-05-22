@@ -38,3 +38,4 @@ concept MatrixType = Implementation::IsMatrixType<std::remove_cv_t<T>>::value;
 template <typename T>
 concept MutableMatrixType = Implementation::IsMutableMatrixType<std::remove_cv_t<T>>::value;
 } // namespace LinAlgTools::Core 
+
