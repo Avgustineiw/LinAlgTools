@@ -19,7 +19,6 @@ struct TripletBidiagonal
 }//namespace Implementation
 using Index = Core::Indices::Index;
 
-//TODO: complex case
 template<Core::MatrixType M>
 Implementation::TripletBidiagonal<typename M::ElementType> Bidiagonalization(const M& matrix) {
         using T = M::ElementType;
@@ -56,3 +55,4 @@ Implementation::TripletBidiagonal<typename M::ElementType> Bidiagonalization(con
         return {std::move(U), std::move(B), std::move(V)};
 }
 }// namespace LinAlgTools::Algorithm
+
