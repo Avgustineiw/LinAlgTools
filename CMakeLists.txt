@@ -15,7 +15,7 @@ FetchContent_MakeAvailable(googletest)
 enable_testing()
 
 include(GoogleTest)
-file(GLOB TEST_FILES "tests/benchmark_tests/*.cpp")
+file(GLOB TEST_FILES "tests/validation_tests/*.cpp")
 
 add_executable(test_all ${TEST_FILES})
 target_link_libraries(test_all PRIVATE gtest_main)

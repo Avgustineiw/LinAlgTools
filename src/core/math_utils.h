@@ -11,11 +11,16 @@
 namespace LinAlgTools::Core {
 using Index = Indices::Index;
 
-constexpr double EPSILON = 1e-10;
+constexpr long double EPSILON = 1e-15;
 
 template<typename T>
 bool IsZero(const T& value) {
-        return std::norm(value) <= EPSILON;
+        if (IsComplexType<T>) {
+                return std::norm(value) < EPSILON;
+        }
+        else {
+                return std::abs(value) < EPSILON;
+        }
 }
 
 template<typename T>
@@ -72,4 +77,3 @@ bool IsUpperTriangular(const M& matrix) {
         return true;
 }
 }// namespace LinAlgTools::Core
-

@@ -6,6 +6,7 @@
 #include "givens.h"
 #include "householder.h"
 
+#include <iostream>
 #include <utility>
 
 namespace LinAlgTools::Algorithm {
@@ -19,9 +20,9 @@ struct PairQR
 }//namespace Implementation
 using Index = Core::Indices::Index;
 
-template<Core::MatrixType F>
-Implementation::PairQR<typename F::ElementType> HouseholderQR(const F& matrix) {
-        using T = F::ElementType;
+template<Core::MatrixType M>
+Implementation::PairQR<typename M::ElementType> HouseholderQR(const M& matrix) {
+        using T = M::ElementType;
 
         if (Core::IsUpperTriangular(matrix)) {
                 return {std::move(Matrix<T>::Identity(matrix.Rows())), std::move(matrix)};

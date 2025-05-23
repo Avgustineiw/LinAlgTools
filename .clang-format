@@ -65,3 +65,4 @@ SpacesInParentheses: false
 SpacesInSquareBrackets: false
 TabWidth: 8
 UseTab: Never
+InsertNewlineAtEOF: true
