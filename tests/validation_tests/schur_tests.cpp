@@ -20,7 +20,8 @@ bool CheckSchur(const M& matrix, const U& unitary, const S& schur) {
         Matrix<typename M::ElementType> UUstar = unitary * unitary.ConjugateTransposed();
 
         return AreEqualMatrices(matrix, reconstruction) &&
-               AreEqualMatrices(UUstar, identity);
+               AreEqualMatrices(UUstar, identity) &&
+               IsUpperTriangular(schur);
 }
 
 TEST(TEST_SCHUR_DECOMPOSITION, RealSchurRealEigenvalues) {
@@ -38,7 +39,8 @@ TEST(TEST_SCHUR_DECOMPOSITION, RealSchurComplexEigenvalues) {
                             {0, 0, 2}};
         auto [U, S] = RealSchur(A);
 
-        EXPECT_TRUE(CheckSchur(A, U, S));
+        EXPECT_TRUE(AreEqualMatrices(S, A));
+        EXPECT_TRUE(IsOrthogonal(U));
 }
 
 TEST(TEST_SCHUR_DECOMPOSITION, RealSchurSymmetricMatrix) {
