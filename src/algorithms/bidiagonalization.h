@@ -38,7 +38,7 @@ Implementation::TripletBidiagonal<typename M::ElementType> Bidiagonalization(con
                 HouseholderLeftRotation(submatrixU, column_vector);
 
                 Index row = column;
-                if (row > matrix.Rows() - 1) break;
+                if (row > matrix.Rows() - 2) break;
                 Matrix<T> row_vector = B.GetSubMatrix({row, row},
                                                       {row + 1, matrix.Columns() - 1});
                 submatrixB = B.GetSubMatrix({row, matrix.Rows() - 1},

@@ -17,7 +17,8 @@ struct TripletSVD
 }//namespace Implementation
 
 template<Core::MatrixType M>
-Implementation::TripletSVD<typename M::ElementType> NaiveSVD(const M& matrix, const size_t iterations = 15) {
+Implementation::TripletSVD<typename M::ElementType> NaiveSVD(const M& matrix,
+                                                             const size_t iterations = 100) {
         assert(iterations > 0 &&
                "Number of iterations must be positive");
         using T = M::ElementType;
@@ -25,11 +26,11 @@ Implementation::TripletSVD<typename M::ElementType> NaiveSVD(const M& matrix, co
         auto [U, S1, V] = Bidiagonalization(matrix);
         V.ConjugateTranspose();
         for (size_t k = 0; k < iterations; k++) {
-                auto [Q1, S1_new] = HouseholderQR(S1);
-                auto [Q2, R2] = HouseholderQR(S1_new.ConjugateTransposed());
+                auto [Q1, R1] = HouseholderQR(S1);
+                auto [Q2, R2] = HouseholderQR(R1.ConjugateTransposed());
                 S1 = R2.ConjugateTransposed();
-                U = U * Q1;
-                V = V * Q2;
+                U *= Q1;
+                V *= Q2;
         }
         V.ConjugateTranspose();
         S1.RemoveZeros();

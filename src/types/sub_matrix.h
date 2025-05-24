@@ -116,15 +116,20 @@ public:
                 return ToConstSubMatrix().Trace();
         }
 
-        T Get2Norm() const {
-                return ToConstSubMatrix().Get2Norm();
+        T GetVector2Norm() const {
+                return ToConstSubMatrix().GetVector2Norm();
         }
+
+        T GetFrobeniusNorm() const {
+                return ToConstSubMatrix().GetFrobeniusNorm();
+        }
+
 
         SubMatrix& Normalize() {
                 assert(pmatrix_ != nullptr &&
                        "Matrix pointer is null.");
 
-                T norm = Get2Norm();
+                T norm = GetVector2Norm();
                 if (norm != T{0}) {
                         *this /= norm;
                 }

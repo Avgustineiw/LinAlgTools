@@ -6,7 +6,6 @@
 #include "givens.h"
 #include "householder.h"
 
-#include <iostream>
 #include <utility>
 
 namespace LinAlgTools::Algorithm {
@@ -27,7 +26,6 @@ Implementation::PairQR<typename M::ElementType> HouseholderQR(const M& matrix) {
         if (Core::IsUpperTriangular(matrix)) {
                 return {std::move(Matrix<T>::Identity(matrix.Rows())), std::move(matrix)};
         }
-
 
         Matrix<T> Q = Matrix<T>::Identity(matrix.Rows());
         Matrix<T> R = matrix;
@@ -71,7 +69,6 @@ Implementation::PairQR<typename M::ElementType> GivensQR(const M& matrix) {
                                                                  {column, matrix.Columns() - 1});
                         SubMatrix<T> submatrixQ = Q.GetSubMatrix({0, matrix.Rows() - 1},
                                                                  {0, matrix.Rows() - 1});
-
 
                         GivensLeftRotation(submatrixR, row, row + 1, first, second);
                         GivensRightRotation(submatrixQ, row, row + 1, first, second);

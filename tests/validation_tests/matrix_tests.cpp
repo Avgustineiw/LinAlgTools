@@ -134,12 +134,12 @@ TEST(TEST_MATRIX, SubMatrixOperations) {
 TEST(TEST_MATRIX, NormAndNormalization) {
         Matrix<double> m = {{1}, {2}, {3}, {4}};
 
-        double norm = m.Get2Norm();
+        double norm = m.GetVector2Norm();
         EXPECT_DOUBLE_EQ(norm, std::sqrt(1 + 4 + 9 + 16));
 
         Matrix<double> normalized = m;
         normalized.Normalize();
-        double normalizedNorm = normalized.Get2Norm();
+        double normalizedNorm = normalized.GetVector2Norm();
         EXPECT_NEAR(normalizedNorm, 1.0, 1e-10);
 }
 

@@ -160,8 +160,12 @@ public:
                 return *this;
         }
 
-        T Get2Norm() const {
-                return ToSubMatrix().Get2Norm();
+        T GetVector2Norm() const {
+                return ToSubMatrix().GetVector2Norm();
+        }
+
+        T GetFrobeniusNorm() const {
+                return ToSubMatrix().GetFrobeniusNorm();
         }
 
         Matrix& Normalize() {

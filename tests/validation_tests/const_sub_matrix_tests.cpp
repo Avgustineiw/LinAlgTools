@@ -24,7 +24,7 @@ TEST(TEST_CONST_SUBMATRIX, Operations) {
 
         Matrix<double> vecMat = {{1}, {2}, {3}};
         ConstSubMatrix<double> vecSub(vecMat);
-        EXPECT_DOUBLE_EQ(vecSub.Get2Norm(), std::sqrt(14));
+        EXPECT_DOUBLE_EQ(vecSub.GetVector2Norm(), std::sqrt(14));
 }
 
 TEST(TEST_CONST_SUBMATRIX, Slicing) {

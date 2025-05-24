@@ -9,7 +9,7 @@
 namespace {
 constexpr int32_t MATRICES_PER_ITERATION = 10;
 constexpr int32_t MIN_SIZE = 1;
-constexpr int32_t MAX_SIZE = 300;
+constexpr int32_t MAX_SIZE = 100;
 constexpr int32_t SIZE_STEP = 1;
 }// namespace
 
@@ -18,11 +18,11 @@ using namespace LinAlgTools::Tests::Utils;
 
 RandomGenerator<std::complex<long double>> generator(20);
 
-void RunQRPerformanceTest(QRMethod method, const std::string& methodName) {
-        std::string filename = "qr_performance_" + methodName + ".csv";
+void RunSVDPerformanceTest(QRMethod method, const std::string& methodName) {
+        std::string filename = "svd_performance_" + methodName + ".csv";
         std::ofstream outFile(filename, std::ios::app);
 
-        std::cout << "\nQR Decomposition Performance Test (" << methodName << ")\n";
+        std::cout << "\nSVD Decomposition Performance Test (" << methodName << ")\n";
         std::cout << "---------------------------------\n";
         std::cout << std::setw(10) << "Size"
                   << std::setw(15) << "Mean (ms)"
@@ -35,7 +35,7 @@ void RunQRPerformanceTest(QRMethod method, const std::string& methodName) {
         }
 
         for (int32_t size = MIN_SIZE; size <= MAX_SIZE; size += SIZE_STEP) {
-                auto stats = GetQRTimingStatistics(size, MATRICES_PER_ITERATION, method, generator);
+                auto stats = GetSVDTimingStatistics(size, MATRICES_PER_ITERATION, generator);
 
                 std::cout << std::setw(10) << size
                           << std::setw(15) << stats.mean
@@ -57,11 +57,6 @@ void RunQRPerformanceTest(QRMethod method, const std::string& methodName) {
         std::cout << "\nResults saved to: " << filename << '\n';
 }
 
-// TEST(TEST_PERFORMANCE_QR, HouseholderPerformance) {
-//         RunQRPerformanceTest(QRMethod::Householder, "Householder");
-// }
-//
-// TEST(TEST_PERFORMANCE_QR, GivensPerformance) {
-//         RunQRPerformanceTest(QRMethod::Givens, "Givens");
-// }
-
+TEST(TEST_PERFORMANCE_QR, HouseholderPerformance) {
+        RunSVDPerformanceTest(QRMethod::Householder, "Naive");
+}

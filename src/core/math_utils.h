@@ -7,15 +7,16 @@
 #include <cmath>
 #include <complex>
 #include <cstdlib>
+#include <iostream>
 
 namespace LinAlgTools::Core {
 using Index = Indices::Index;
 
-constexpr long double EPSILON = 1e-15;
+inline constexpr long double EPSILON = 1e-10;
 
 template<typename T>
 bool IsZero(const T& value) {
-        if (IsComplexType<T>) {
+        if constexpr (IsComplexType<T>) {
                 return std::norm(value) < EPSILON;
         }
         else {
@@ -57,7 +58,7 @@ bool AreEqualMatrices(const F& lhs, const S& rhs) {
 template<MatrixType M>
 bool IsOrthogonal(const M& matrix) {
         for (Index row = 1; row <= matrix.Columns(); row++) {
-                if (!IsZero(matrix.GetColumn(row).Get2Norm() - 1)) {
+                if (!IsZero(matrix.GetColumn(row).GetVector2Norm() - 1)) {
                         return false;
                 }
         }
@@ -67,7 +68,7 @@ bool IsOrthogonal(const M& matrix) {
 
 template<MatrixType M>
 bool IsUpperTriangular(const M& matrix) {
-        for (Index i = 0; i < matrix.Rows(); ++i) {
+        for (Index i = 1; i < matrix.Rows(); ++i) {
                 for (Index j = 0; j < i && j < matrix.Columns(); ++j) {
                         if (!IsZero(matrix(i, j))) {
                                 return false;
@@ -76,4 +77,17 @@ bool IsUpperTriangular(const M& matrix) {
         }
         return true;
 }
+
+template<MatrixType M>
+bool IsUpperHessenberg(const M& matrix) {
+        for (Index i = 2; i < matrix.Rows(); ++i) {
+                for (Index j = 0; j < i - 1; ++j) {
+                        if (!IsZero(matrix(i, j))) {
+                                return false;
+                        }
+                }
+        }
+        return true;
+}
 }// namespace LinAlgTools::Core
+

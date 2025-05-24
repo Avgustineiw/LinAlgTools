@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../../../src/algorithms/qr_decomposition.h"
+#include "../../../src/algorithms/svd.h"
 #include "random_generator.h"
 
 #include <chrono>
@@ -23,6 +24,9 @@ struct TimingResult
         double stddev = 0.0;
         size_t count = 0;
 };
+
+using Clock = std::chrono::high_resolution_clock;
+using Ms = std::chrono::milliseconds;
 
 TimingResult CalculateStatistics(const std::vector<int64_t>& data) {
         TimingResult result;
@@ -58,9 +62,6 @@ TimingResult CalculateStatistics(const std::vector<int64_t>& data) {
 TimingResult GetQRTimingStatistics(int32_t size, int32_t iterations,
                                    QRMethod method,
                                    RandomGenerator<std::complex<long double>> generator) {
-        using Clock = std::chrono::high_resolution_clock;
-        using Ms = std::chrono::milliseconds;
-
         std::vector<int64_t> data;
 
         for (int i = 0; i < iterations; i++) {
@@ -92,5 +93,22 @@ TimingResult GetQRTimingStatistics(int32_t size, int32_t iterations,
 
         return CalculateStatistics(data);
 }
-} //namespace LinAlgTools::Tests::Utils
+
+TimingResult GetSVDTimingStatistics(int32_t size, int32_t iterations,
+                                    RandomGenerator<std::complex<long double>> generator) {
+        std::vector<int64_t> data;
+
+        for (int i = 0; i < iterations; i++) {
+                auto matrix = generator.GetRandomSparseMatrix(size);
+
+                auto start = Clock::now();
+                auto result = LinAlgTools::Algorithm::NaiveSVD(matrix);
+                auto end = Clock::now();
+
+                data.push_back(std::chrono::duration_cast<Ms>(end - start).count());
+        }
+
+        return CalculateStatistics(data);
+}
+}//namespace LinAlgTools::Tests::Utils
 

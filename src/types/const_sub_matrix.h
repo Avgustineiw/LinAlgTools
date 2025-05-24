@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../core/matrix_traits.h"
 #include "../core/indices.h"
+#include "../core/matrix_traits.h"
 #include "matrix.h"
 
 #include <cassert>
@@ -135,17 +135,18 @@ public:
                 return result;
         }
 
-        T Get2Norm() const {
+        T GetVector2Norm() const {
                 assert(pmatrix_ != nullptr &&
                        "Matrix pointer is null.");
                 assert(Rows() == 1 || Columns() == 1 &&
                                               "Incorrect size for vector norm.");
+                return Calculate2Norm();
+        }
 
-                T result = T{0};
-                Elementwise([&result](const T& value) {
-                        result += std::norm(value);
-                });
-                return std::sqrt(result);
+        T GetFrobeniusNorm() const {
+                assert(pmatrix_ != nullptr &&
+                       "Matrix pointer is null.");
+                return Calculate2Norm();
         }
 
         Matrix<T> Transposed() const {
@@ -195,6 +196,13 @@ private:
         RowSlice rows_;
         ColumnSlice columns_;
         bool transposed_ = false;
+
+        T Calculate2Norm() const {
+                T result = T{0};
+                Elementwise([&result](const T& value) {
+                        result += std::norm(value);
+                });
+                return std::sqrt(result);
+        }
 };
 }//namespace LinAlgTools
-
