@@ -130,7 +130,7 @@ public:
                        "Matrix pointer is null.");
 
                 T norm = GetVector2Norm();
-                if (norm != T{0}) {
+                if (!Core::IsZero(norm)) {
                         *this /= norm;
                 }
                 RemoveZeros();
@@ -207,7 +207,7 @@ public:
 
                 Elementwise([](T& value) {
                         if (Core::IsZero(value)) {
-                                value = 0;
+                                value = T{0};
                         };
                 });
                 return *this;

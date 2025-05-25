@@ -7,7 +7,6 @@
 #include <cmath>
 #include <complex>
 #include <cstdlib>
-#include <iostream>
 
 namespace LinAlgTools::Core {
 using Index = Indices::Index;

@@ -1,16 +1,24 @@
 #pragma once
 
 #include "../../../src/algorithms/qr_decomposition.h"
-#include "../../../src/algorithms/svd.h"
 #include "../../../src/algorithms/schur_decomposition.h"
+#include "../../../src/algorithms/svd.h"
 #include "random_generator.h"
 
 #include <chrono>
 #include <complex>
 #include <cstdint>
+#include <fstream>
 #include <gtest/gtest.h>
 
 namespace LinAlgTools::Tests::Utils {
+namespace {
+constexpr int32_t MIN_SIZE = 1;
+constexpr int32_t MAX_SIZE = 100;
+constexpr int32_t SIZE_STEP = 1;
+constexpr int32_t MATRICES_PER_ITERATION = 10;
+}// namespace
+
 enum class Method
 {
         HouseholderQR,
@@ -30,6 +38,8 @@ struct TimingResult
 
 using Clock = std::chrono::high_resolution_clock;
 using Ms = std::chrono::milliseconds;
+using namespace LinAlgTools::Tests;
+using namespace LinAlgTools::Tests::Utils;
 
 TimingResult CalculateStatistics(const std::vector<int64_t>& data) {
         TimingResult result;
@@ -62,9 +72,10 @@ TimingResult CalculateStatistics(const std::vector<int64_t>& data) {
         return result;
 }
 
+template<typename T = std::complex<long double>>
 TimingResult GetTimingStatistics(Method method,
-                                 RandomGenerator<std::complex<long double>> generator,
-                                 size_t size, size_t iterations) {
+                                 RandomGenerator<T> generator,
+                                 int32_t size, int32_t iterations) {
         std::vector<int64_t> data;
 
         for (int i = 0; i < iterations; i++) {
@@ -108,6 +119,67 @@ TimingResult GetTimingStatistics(Method method,
         }
 
         return CalculateStatistics(data);
+}
+
+template<typename T = std::complex<long double>>
+void RunPerformanceTest(Method method,
+                        int32_t min_size = MIN_SIZE, int32_t max_size = MAX_SIZE, 
+                        int32_t size_step = SIZE_STEP, int32_t matrices_per_iteration = MATRICES_PER_ITERATION,
+                        RandomGenerator<T> generator = RandomGenerator<T>(20)) {
+        std::string method_name;
+        switch (method) {
+                case Method::HouseholderQR:
+                        method_name = "HouseholderQR";
+                        break;
+                case Method::GivensQR:
+                        method_name = "GivensQR";
+                        break;
+                case Method::RealSchur:
+                        method_name = "RealSchur";
+                        break;
+                case Method::NaiveSVD:
+                        method_name = "NaiveSVD";
+                        break;
+                default:
+                        throw std::runtime_error("Unknown method");
+        }
+
+        std::string filename = method_name + "_performance.csv";
+        std::ofstream outFile(filename, std::ios::app);
+
+        std::cout << "\nPerformance Test (" << method_name << ")\n";
+        std::cout << "---------------------------------\n";
+        std::cout << std::setw(10) << "Size"
+                  << std::setw(15) << "Mean (ms)"
+                  << std::setw(15) << "Min (ms)"
+                  << std::setw(15) << "Max (ms)"
+                  << std::setw(15) << "StdDev\n";
+
+        if (outFile.tellp() == 0) {
+                outFile << "Algorithm,Size,Mean (ms),Min (ms),Max (ms),StdDev\n";
+        }
+
+        for (int32_t size = min_size; size <= max_size; size += size_step) {
+                auto stats = GetTimingStatistics(method, generator, size, matrices_per_iteration);
+
+                std::cout << std::setw(10) << size
+                          << std::setw(15) << stats.mean
+                          << std::setw(15) << stats.min
+                          << std::setw(15) << stats.max
+                          << std::setw(15) << std::fixed << std::setprecision(2)
+                          << stats.stddev << '\n';
+
+                outFile << method_name << ","
+                        << size << ","
+                        << stats.mean << ","
+                        << stats.min << ","
+                        << stats.max << ","
+                        << std::fixed << std::setprecision(6)
+                        << stats.stddev << '\n';
+        }
+
+        outFile.close();
+        std::cout << "\nResults saved to: " << filename << '\n';
 }
 }//namespace LinAlgTools::Tests::Utils
 

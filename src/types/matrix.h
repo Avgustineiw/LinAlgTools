@@ -312,7 +312,7 @@ F& operator*=(F& lhs, const S& rhs) {
                 }
         }
 
-        lhs.RemoveZeros();
+        result.RemoveZeros();
         return lhs;
 }
 

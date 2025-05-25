@@ -18,14 +18,14 @@ struct TripletSVD
 
 template<Core::MatrixType M>
 Implementation::TripletSVD<typename M::ElementType> NaiveSVD(const M& matrix,
-                                                             const size_t iterations = 10) {
+                                                             const int32_t iterations = 10) {
         assert(iterations > 0 &&
                "Number of iterations must be positive");
 
         auto [U, S1, V] = Bidiagonalization(matrix);
         V.ConjugateTranspose();
 
-        for (size_t k = 0; k < iterations * matrix.Columns(); k++) {
+        for (int32_t k = 0; k < iterations * matrix.Columns(); k++) {
                 auto [Q1, R1] = HouseholderQR(S1);
                 auto [Q2, R2] = HouseholderQR(R1.ConjugateTransposed());
                 S1 = R2.ConjugateTransposed();

@@ -65,13 +65,13 @@ public:
                 Matrix<T> result(rows, cols);
 
                 Index total_elements = rows * cols;
-                Index non_zero_elements = static_cast<size_t>(total_elements * density);
+                Index non_zero_elements = static_cast<int32_t>(total_elements * density);
 
                 if (density > 0.0 && non_zero_elements == 0) {
                         non_zero_elements = 1;
                 }
 
-                for (size_t i = 0; i < non_zero_elements; ++i) {
+                for (int32_t i = 0; i < non_zero_elements; ++i) {
                         Index row = static_cast<Index>(GetRandomInt(0, rows - 1));
                         Index col = static_cast<Index>(GetRandomInt(0, cols - 1));
                         result(row, col) = GetRandomTypeValue();

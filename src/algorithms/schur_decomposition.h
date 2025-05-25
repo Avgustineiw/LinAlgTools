@@ -17,7 +17,7 @@ struct PairSchur
 
 template<Core::MatrixType M>
 Implementation::PairSchur<typename M::ElementType> RealSchur(const M& matrix,
-                                                             const size_t iterations = 10) {
+                                                             const int32_t iterations = 1000) {
         assert(!Core::IsComplexType<typename M::ElementType> &&
                "Real Schur Decomposition only for real matrices");
         assert(iterations > 0 &&
@@ -26,12 +26,12 @@ Implementation::PairSchur<typename M::ElementType> RealSchur(const M& matrix,
                "Matrix must be square for Schur's decomposition");
 
         auto [U, S] = HessenbergForm(matrix);
-        for (size_t k = 0; k < iterations * matrix.Rows() * matrix.Columns(); k++) {
+        for (int32_t k = 0; k < iterations * matrix.Columns(); k++) {
                 if (Core::IsUpperTriangular(S)) break;
 
-                auto [Q, R] = GivensQR(S);
+                auto [Q, R] = HouseholderQR(S);
                 S = R * Q;
-                U = U * Q;
+                U *= Q;
         }
 
         S.RemoveZeros();
