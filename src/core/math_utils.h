@@ -55,10 +55,27 @@ bool AreEqualMatrices(const F& lhs, const S& rhs) {
         return true;
 }
 
+
+template<MatrixType M>
+bool IsDiagonal(const M& matrix) {
+        for (Index i = 0; i < matrix.Rows(); i++) {
+                for (Index j = 0; j < matrix.Columns(); j++) {
+                        if (i == j) continue;
+
+                        if (!IsZero(matrix(i, j))) {
+                                return false;
+                        }
+                }
+        }
+
+        return true;
+}
+
 template<MatrixType M>
 bool IsOrthogonal(const M& matrix) {
+        using T = M::ElementType;
         for (Index row = 1; row <= matrix.Columns(); row++) {
-                if (!IsZero(matrix.GetColumn(row).GetVector2Norm() - 1)) {
+                if (!IsZero(matrix.GetColumn(row).GetVector2Norm() - T{1})) {
                         return false;
                 }
         }

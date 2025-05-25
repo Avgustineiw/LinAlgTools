@@ -17,23 +17,23 @@ struct PairSchur
 
 template<Core::MatrixType M>
 Implementation::PairSchur<typename M::ElementType> RealSchur(const M& matrix,
-                                                             const size_t iterations = 500) {
+                                                             const size_t iterations = 10) {
+        assert(!Core::IsComplexType<typename M::ElementType> &&
+               "Real Schur Decomposition only for real matrices");
         assert(iterations > 0 &&
                "Number of iterations must be positive");
         assert(matrix.Rows() == matrix.Columns() &&
                "Matrix must be square for Schur's decomposition");
-        using T = M::ElementType;
 
         auto [U, S] = HessenbergForm(matrix);
-        for (size_t k = 0; k < iterations; k++) {
-                if (Core::IsUpperTriangular(S)) {
-                        break;
-                }
+        for (size_t k = 0; k < iterations * matrix.Rows() * matrix.Columns(); k++) {
+                if (Core::IsUpperTriangular(S)) break;
 
                 auto [Q, R] = GivensQR(S);
                 S = R * Q;
                 U = U * Q;
         }
+
         S.RemoveZeros();
         return {std::move(U), std::move(S)};
 }

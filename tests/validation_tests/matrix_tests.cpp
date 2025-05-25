@@ -168,7 +168,6 @@ TEST(TEST_MATRIX, ComparisonOperators) {
 }
 
 TEST(TEST_MATRIX, EdgeCases) {
-
         Matrix<double> single = {{42}};
         EXPECT_EQ(single.Rows(), 1);
         EXPECT_EQ(single.Columns(), 1);

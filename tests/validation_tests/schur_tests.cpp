@@ -85,12 +85,3 @@ TEST(TEST_SCHUR_DECOMPOSITION, RealSchurIllConditioned) {
         EXPECT_TRUE(CheckSchur(A, U, S));
 }
 
-TEST(TEST_SCHUR_DECOMPOSITION, RealSchurComplexMatrix) {
-        Matrix<std::complex<double>> A = {{{1, 0}, {0, 1}, {2, 0}},
-                                          {{0, -1}, {1, 0}, {0, 0}},
-                                          {{2, 0}, {0, 0}, {3, 0}}};
-        auto [U, S] = RealSchur(A);
-
-        EXPECT_TRUE(CheckSchur(A, U, S));
-}
-

@@ -2,6 +2,7 @@
 
 #include "../../../src/algorithms/qr_decomposition.h"
 #include "../../../src/algorithms/svd.h"
+#include "../../../src/algorithms/schur_decomposition.h"
 #include "random_generator.h"
 
 #include <chrono>
@@ -10,10 +11,12 @@
 #include <gtest/gtest.h>
 
 namespace LinAlgTools::Tests::Utils {
-enum class QRMethod
+enum class Method
 {
-        Householder,
-        Givens
+        HouseholderQR,
+        GivensQR,
+        RealSchur,
+        NaiveSVD,
 };
 
 struct TimingResult
@@ -59,9 +62,9 @@ TimingResult CalculateStatistics(const std::vector<int64_t>& data) {
         return result;
 }
 
-TimingResult GetQRTimingStatistics(int32_t size, int32_t iterations,
-                                   QRMethod method,
-                                   RandomGenerator<std::complex<long double>> generator) {
+TimingResult GetTimingStatistics(Method method,
+                                 RandomGenerator<std::complex<long double>> generator,
+                                 size_t size, size_t iterations) {
         std::vector<int64_t> data;
 
         for (int i = 0; i < iterations; i++) {
@@ -70,15 +73,28 @@ TimingResult GetQRTimingStatistics(int32_t size, int32_t iterations,
                 Clock::time_point start;
                 Clock::time_point end;
                 switch (method) {
-                        case QRMethod::Householder: {
+                        case Method::HouseholderQR: {
                                 start = Clock::now();
                                 auto result = LinAlgTools::Algorithm::HouseholderQR(matrix);
                                 end = Clock::now();
                                 break;
                         }
-                        case QRMethod::Givens: {
+                        case Method::GivensQR: {
                                 start = Clock::now();
                                 auto result = LinAlgTools::Algorithm::GivensQR(matrix);
+                                end = Clock::now();
+                                break;
+                        }
+                        case Method::RealSchur: {
+                                start = Clock::now();
+                                auto result = LinAlgTools::Algorithm::RealSchur(matrix);
+                                end = Clock::now();
+                                break;
+                        }
+
+                        case Method::NaiveSVD: {
+                                start = Clock::now();
+                                auto result = LinAlgTools::Algorithm::NaiveSVD(matrix);
                                 end = Clock::now();
                                 break;
                         }
@@ -87,23 +103,6 @@ TimingResult GetQRTimingStatistics(int32_t size, int32_t iterations,
                                 break;
                         }
                 }
-
-                data.push_back(std::chrono::duration_cast<Ms>(end - start).count());
-        }
-
-        return CalculateStatistics(data);
-}
-
-TimingResult GetSVDTimingStatistics(int32_t size, int32_t iterations,
-                                    RandomGenerator<std::complex<long double>> generator) {
-        std::vector<int64_t> data;
-
-        for (int i = 0; i < iterations; i++) {
-                auto matrix = generator.GetRandomSparseMatrix(size);
-
-                auto start = Clock::now();
-                auto result = LinAlgTools::Algorithm::NaiveSVD(matrix);
-                auto end = Clock::now();
 
                 data.push_back(std::chrono::duration_cast<Ms>(end - start).count());
         }

@@ -9,20 +9,37 @@
 namespace {
 constexpr int32_t MATRICES_PER_ITERATION = 10;
 constexpr int32_t MIN_SIZE = 1;
-constexpr int32_t MAX_SIZE = 300;
+constexpr int32_t MAX_SIZE = 100;
 constexpr int32_t SIZE_STEP = 1;
 }// namespace
 
 using namespace LinAlgTools::Tests;
 using namespace LinAlgTools::Tests::Utils;
 
-RandomGenerator<std::complex<long double>> generator(20);
+void RunPerformanceTest(Method method,
+                        RandomGenerator<std::complex<long double>> generator = RandomGenerator<std::complex<long double>>(20)) {
+        std::string method_name;
+        switch (method) {
+                case Method::HouseholderQR:
+                        method_name = "HouseholderQR";
+                        break;
+                case Method::GivensQR:
+                        method_name = "GivensQR";
+                        break;
+                case Method::RealSchur:
+                        method_name = "RealSchur";
+                        break;
+                case Method::NaiveSVD:
+                        method_name = "NaiveSVD";
+                        break;
+                default:
+                        throw std::runtime_error("Unknown method");
+        }
 
-void RunQRPerformanceTest(QRMethod method, const std::string& methodName) {
-        std::string filename = "qr_performance_" + methodName + ".csv";
+        std::string filename = method_name + "_performance.csv";
         std::ofstream outFile(filename, std::ios::app);
 
-        std::cout << "\nQR Decomposition Performance Test (" << methodName << ")\n";
+        std::cout << "\nPerformance Test (" << method_name << ")\n";
         std::cout << "---------------------------------\n";
         std::cout << std::setw(10) << "Size"
                   << std::setw(15) << "Mean (ms)"
@@ -35,7 +52,7 @@ void RunQRPerformanceTest(QRMethod method, const std::string& methodName) {
         }
 
         for (int32_t size = MIN_SIZE; size <= MAX_SIZE; size += SIZE_STEP) {
-                auto stats = GetQRTimingStatistics(size, MATRICES_PER_ITERATION, method, generator);
+                auto stats = GetTimingStatistics(method, generator, size, MATRICES_PER_ITERATION);
 
                 std::cout << std::setw(10) << size
                           << std::setw(15) << stats.mean
@@ -44,7 +61,7 @@ void RunQRPerformanceTest(QRMethod method, const std::string& methodName) {
                           << std::setw(15) << std::fixed << std::setprecision(2)
                           << stats.stddev << '\n';
 
-                outFile << methodName << ","
+                outFile << method_name << ","
                         << size << ","
                         << stats.mean << ","
                         << stats.min << ","
@@ -57,11 +74,15 @@ void RunQRPerformanceTest(QRMethod method, const std::string& methodName) {
         std::cout << "\nResults saved to: " << filename << '\n';
 }
 
-// TEST(TEST_PERFORMANCE_QR, HouseholderPerformance) {
-//         RunQRPerformanceTest(QRMethod::Householder, "Householder");
-// }
-//
-// TEST(TEST_PERFORMANCE_QR, GivensPerformance) {
-//         RunQRPerformanceTest(QRMethod::Givens, "Givens");
-// }
+TEST(TEST_PERFORMANCE_QR, HouseholderQRPerformance) {
+        RunPerformanceTest(Method::HouseholderQR);
+}
+
+TEST(TEST_PERFORMANCE_QR, GivensQRPerformance) {
+        RunPerformanceTest(Method::GivensQR);
+}
+
+TEST(TEST_PERFORMANCE_SVD, NaiveSVDPerformance) {
+        RunPerformanceTest(Method::NaiveSVD);
+}
 
