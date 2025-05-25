@@ -6,7 +6,9 @@
 using namespace LinAlgTools;
 
 TEST(TEST_CONST_SUBMATRIX, ConstructionAndAccess) {
-        Matrix<double> mat = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}};
+        Matrix<double> mat = {{1, 2, 3},
+                              {4, 5, 6},
+                              {7, 8, 9}};
         ConstSubMatrix<double> csub(mat);
 
         EXPECT_EQ(csub.Rows(), 3);
@@ -16,19 +18,27 @@ TEST(TEST_CONST_SUBMATRIX, ConstructionAndAccess) {
 }
 
 TEST(TEST_CONST_SUBMATRIX, Operations) {
-        Matrix<double> mat = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}};
+        Matrix<double> mat = {{1, 2, 3},
+                              {4, 5, 6},
+                              {7, 8, 9}};
         ConstSubMatrix<double> csub(mat);
 
         EXPECT_EQ(csub.Trace(), 15);
-        EXPECT_EQ(csub.Diagonal(), Matrix<double>({{1}, {5}, {9}}));
+        EXPECT_EQ(csub.Diagonal(), Matrix<double>({{1},
+                                                   {5},
+                                                   {9}}));
 
-        Matrix<double> vecMat = {{1}, {2}, {3}};
+        Matrix<double> vecMat = {{1},
+                                 {2},
+                                 {3}};
         ConstSubMatrix<double> vecSub(vecMat);
         EXPECT_DOUBLE_EQ(vecSub.GetVector2Norm(), std::sqrt(14));
 }
 
 TEST(TEST_CONST_SUBMATRIX, Slicing) {
-        Matrix<double> mat = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}};
+        Matrix<double> mat = {{1, 2, 3},
+                              {4, 5, 6},
+                              {7, 8, 9}};
         ConstSubMatrix<double> csub(mat, {0, 1}, {0, 1});
 
         ConstSubMatrix<double> sub = csub.GetConstSubMatrix({1, 1}, {1, 1});
@@ -36,7 +46,9 @@ TEST(TEST_CONST_SUBMATRIX, Slicing) {
 }
 
 TEST(TEST_CONST_SUBMATRIX, RowAndColumnAccess) {
-        Matrix<double> mat = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}};
+        Matrix<double> mat = {{1, 2, 3},
+                              {4, 5, 6},
+                              {7, 8, 9}};
         ConstSubMatrix<double> csub(mat);
 
         auto row = csub.GetRow(2);
@@ -47,7 +59,8 @@ TEST(TEST_CONST_SUBMATRIX, RowAndColumnAccess) {
 }
 
 TEST(TEST_CONST_SUBMATRIX, TransposedView) {
-        Matrix<double> mat = {{1, 2, 3}, {4, 5, 6}};
+        Matrix<double> mat = {{1, 2, 3},
+                              {4, 5, 6}};
         ConstSubMatrix<double> csub(mat);
         auto transposed = csub.Transposed();
 

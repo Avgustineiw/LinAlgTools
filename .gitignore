@@ -292,3 +292,4 @@ notes.txt
 main
 main.cpp
 analysis.ipynb
+compile_commands.json

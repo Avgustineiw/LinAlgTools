@@ -20,21 +20,29 @@ bool CheckQR(const M& matrix, const F& Q, const S& R) {
 }
 
 TEST(TEST_QR_DECOMPOSITION, HouseholderSquareMatrix) {
-        Matrix<double> A = {{12, -51, 4}, {6, 167, -68}, {-4, 24, -41}};
+        Matrix<double> A = {{12, -51, 4},
+                            {6, 167, -68},
+                            {-4, 24, -41}};
         auto [Q, R] = LinAlgTools::Algorithm::HouseholderQR(A);
 
         EXPECT_TRUE(CheckQR(A, Q, R));
 }
 
 TEST(TEST_QR_DECOMPOSITION, HouseholderRectangularMatrix) {
-        Matrix<double> A = {{1, 2}, {3, 4}, {5, 6}, {7, 8}};
+        Matrix<double> A = {{1, 2},
+                            {3, 4},
+                            {5, 6},
+                            {7, 8}};
         auto [Q, R] = LinAlgTools::Algorithm::HouseholderQR(A);
 
         EXPECT_TRUE(CheckQR(A, Q, R));
 }
 
 TEST(TEST_QR_DECOMPOSITION, HouseholderSingleColumn) {
-        Matrix<double> A = {{1}, {2}, {3}, {4}};
+        Matrix<double> A = {{1},
+                            {2},
+                            {3},
+                            {4}};
         auto [Q, R] = LinAlgTools::Algorithm::HouseholderQR(A);
 
         EXPECT_TRUE(CheckQR(A, Q, R));
@@ -49,7 +57,9 @@ TEST(TEST_QR_DECOMPOSITION, HouseholderSingleRow) {
 
 
 TEST(TEST_QR_DECOMPOSITION, HouseholderZeroMatrix) {
-        Matrix<double> A = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
+        Matrix<double> A = {{0, 0, 0},
+                            {0, 0, 0},
+                            {0, 0, 0}};
         auto [Q, R] = LinAlgTools::Algorithm::HouseholderQR(A);
 
         Matrix<double> expected_identity = Matrix<double>::Identity(A.Rows());
@@ -62,7 +72,9 @@ TEST(TEST_QR_DECOMPOSITION, HouseholderZeroMatrix) {
 }
 
 TEST(TEST_QR_DECOMPOSITION, HouseholderAlreadyUpperTriangular) {
-        Matrix<double> A = {{1, 2, 3}, {0, 4, 5}, {0, 0, 6}};
+        Matrix<double> A = {{1, 2, 3},
+                            {0, 4, 5},
+                            {0, 0, 6}};
         auto [Q, R] = LinAlgTools::Algorithm::HouseholderQR(A);
 
         Matrix<double> expected_identity = Matrix<double>::Identity(A.Rows());
@@ -74,21 +86,29 @@ TEST(TEST_QR_DECOMPOSITION, HouseholderAlreadyUpperTriangular) {
 }
 
 TEST(TEST_QR_DECOMPOSITION, GivensSquareMatrix) {
-        Matrix<double> A = {{12, -51, 4}, {6, 167, -68}, {-4, 24, -41}};
+        Matrix<double> A = {{12, -51, 4},
+                            {6, 167, -68},
+                            {-4, 24, -41}};
         auto [Q, R] = LinAlgTools::Algorithm::GivensQR(A);
 
         EXPECT_TRUE(CheckQR(A, Q, R));
 }
 
 TEST(TEST_QR_DECOMPOSITION, GivensRectangularMatrix) {
-        Matrix<double> A = {{1, 2}, {3, 4}, {5, 6}, {7, 8}};
+        Matrix<double> A = {{1, 2},
+                            {3, 4},
+                            {5, 6},
+                            {7, 8}};
         auto [Q, R] = LinAlgTools::Algorithm::GivensQR(A);
 
         EXPECT_TRUE(CheckQR(A, Q, R));
 }
 
 TEST(TEST_QR_DECOMPOSITION, GivensSingleColumn) {
-        Matrix<double> A = {{1}, {2}, {3}, {4}};
+        Matrix<double> A = {{1},
+                            {2},
+                            {3},
+                            {4}};
         auto [Q, R] = LinAlgTools::Algorithm::GivensQR(A);
 
         EXPECT_TRUE(CheckQR(A, Q, R));
@@ -103,7 +123,9 @@ TEST(TEST_QR_DECOMPOSITION, GivensSingleRow) {
 
 
 TEST(TEST_QR_DECOMPOSITION, GivensZeroMatrix) {
-        Matrix<double> A = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
+        Matrix<double> A = {{0, 0, 0},
+                            {0, 0, 0},
+                            {0, 0, 0}};
         auto [Q, R] = LinAlgTools::Algorithm::GivensQR(A);
 
         Matrix<double> expected_identity = Matrix<double>::Identity(A.Rows());
@@ -116,7 +138,9 @@ TEST(TEST_QR_DECOMPOSITION, GivensZeroMatrix) {
 }
 
 TEST(TEST_QR_DECOMPOSITION, GivensAlreadyUpperTriangular) {
-        Matrix<double> A = {{1, 2, 3}, {0, 4, 5}, {0, 0, 6}};
+        Matrix<double> A = {{1, 2, 3},
+                            {0, 4, 5},
+                            {0, 0, 6}};
         auto [Q, R] = LinAlgTools::Algorithm::GivensQR(A);
 
         Matrix<double> expected_identity = Matrix<double>::Identity(A.Rows());

@@ -17,7 +17,7 @@ struct PairSchur
 
 template<Core::MatrixType M>
 Implementation::PairSchur<typename M::ElementType> RealSchur(const M& matrix,
-                                                             const int32_t iterations = 1000) {
+                                                             const int32_t iterations = 50) {
         assert(!Core::IsComplexType<typename M::ElementType> &&
                "Real Schur Decomposition only for real matrices");
         assert(iterations > 0 &&

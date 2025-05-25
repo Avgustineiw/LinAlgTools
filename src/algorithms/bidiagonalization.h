@@ -21,7 +21,7 @@ using Index = Core::Indices::Index;
 
 template<Core::MatrixType M>
 Implementation::TripletBidiagonal<typename M::ElementType> Bidiagonalization(const M& matrix) {
-        using T = M::ElementType;
+        using T = typename M::ElementType;
 
         Matrix<T> U = Matrix<T>::Identity(matrix.Rows());
         Matrix<T> B = matrix;
@@ -37,14 +37,13 @@ Implementation::TripletBidiagonal<typename M::ElementType> Bidiagonalization(con
                 HouseholderLeftRotation(submatrixB, column_vector);
                 HouseholderLeftRotation(submatrixU, column_vector);
 
-                Index row = column;
-                if (row > matrix.Rows() - 2) break;
-                Matrix<T> row_vector = B.GetSubMatrix({row, row},
-                                                      {row + 1, matrix.Columns() - 1});
-                submatrixB = B.GetSubMatrix({row, matrix.Rows() - 1},
-                                            {row + 1, matrix.Columns() - 1});
+                if (column > matrix.Columns() - 2) continue;
+                Matrix<T> row_vector = B.GetSubMatrix({column, column},
+                                                      {column + 1, matrix.Columns() - 1});
+                submatrixB = B.GetSubMatrix({column, matrix.Rows() - 1},
+                                            {column+ 1, matrix.Columns() - 1});
                 SubMatrix<T> submatrixV = V.GetSubMatrix({0, matrix.Columns() - 1},
-                                                         {row + 1, matrix.Columns() - 1});
+                                                         {column+ 1, matrix.Columns() - 1});
                 HouseholderRightRotation(submatrixB, row_vector);
                 HouseholderRightRotation(submatrixV, row_vector);
         }

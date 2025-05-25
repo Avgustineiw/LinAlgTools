@@ -1,0 +1,6 @@
+CompileFlags:
+  Add: [-std=c++23, -I${projectDir}/include]
+  Remove: [-xobjective-c++-header]
+Diagnostics:
+  ClangTidy:
+    Checks: [modernize-*, performance-*]

@@ -9,18 +9,10 @@ using namespace LinAlgTools;
 using namespace LinAlgTools::Core;
 using namespace LinAlgTools::Algorithm;
 
-template<typename T = double>
-using Index = Core::Indices::Index;
-
 template<MatrixType M, MatrixType U, MatrixType S>
 bool CheckSchur(const M& matrix, const U& unitary, const S& schur) {
-        Matrix<typename M::ElementType> reconstruction = unitary * schur * unitary.ConjugateTransposed();
-
-        Matrix<typename M::ElementType> identity = Matrix<typename M::ElementType>::Identity(unitary.Rows());
-        Matrix<typename M::ElementType> UUstar = unitary * unitary.ConjugateTransposed();
-
-        return AreEqualMatrices(matrix, reconstruction) &&
-               AreEqualMatrices(UUstar, identity) &&
+        return AreEqualMatrices(matrix, unitary * schur * unitary.ConjugateTransposed()) &&
+               IsUnitary(unitary) &&
                IsUpperTriangular(schur);
 }
 

@@ -18,7 +18,7 @@ struct TripletSVD
 
 template<Core::MatrixType M>
 Implementation::TripletSVD<typename M::ElementType> NaiveSVD(const M& matrix,
-                                                             const int32_t iterations = 10) {
+                                                             const int32_t iterations = 50) {
         assert(iterations > 0 &&
                "Number of iterations must be positive");
 

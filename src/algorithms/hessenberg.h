@@ -23,7 +23,7 @@ template<Core::MatrixType M>
 Implementation::PairHessenberg<typename M::ElementType> HessenbergForm(const M& matrix) {
         assert(matrix.Rows() == matrix.Columns() &&
                "Hessenberg form cannot be computer for non-square matrices");
-        using T = M::ElementType;
+        using T = typename M::ElementType;
         if (Core::IsUpperHessenberg(matrix)) {
                 return {std::move(Matrix<T>::Identity(matrix.Rows())), std::move(matrix)};
         }

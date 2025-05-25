@@ -20,14 +20,14 @@ Matrix<typename M::ElementType> HouseholderVectorReduction(const M& vector) {
 
 template<Core::MutableMatrixType F, Core::MatrixType S>
 void HouseholderLeftRotation(F& matrix, const S& vector) {
-        using T = F::ElementType;
+        using T = typename F::ElementType;
         Matrix<T> reduced_vector = HouseholderVectorReduction(vector);
         matrix -= (T{2} * reduced_vector) * (reduced_vector.ConjugateTransposed() * matrix);
 }
 
 template<Core::MutableMatrixType F, Core::MatrixType S>
 void HouseholderRightRotation(F& matrix, const S& vector) {
-        using T = F::ElementType;
+        using T = typename F::ElementType;
         Matrix<T> reduced_vector = HouseholderVectorReduction(vector);
         matrix -= (matrix * reduced_vector.ConjugateTransposed()) * (T{2} * reduced_vector);
 }

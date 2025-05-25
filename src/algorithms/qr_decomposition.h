@@ -48,7 +48,7 @@ Implementation::PairQR<typename M::ElementType> HessenbergQR(const M& matrix) {
 
 template<Core::MatrixType M>
 Implementation::PairQR<typename M::ElementType> HouseholderQR(const M& matrix) {
-        using T = M::ElementType;
+        using T = typename M::ElementType;
 
         if (Core::IsUpperTriangular(matrix)) {
                 return {std::move(Matrix<T>::Identity(matrix.Rows())), std::move(matrix)};

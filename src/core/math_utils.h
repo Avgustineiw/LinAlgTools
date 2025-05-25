@@ -54,6 +54,23 @@ bool AreEqualMatrices(const F& lhs, const S& rhs) {
         return true;
 }
 
+template<MatrixType M>
+bool IsOrthogonal(const M& matrix) {
+        using T = typename M::ElementType;
+        for (Index row = 1; row <= matrix.Columns(); row++) {
+                if (!IsZero(matrix.GetColumn(row).GetVector2Norm() - T{1})) {
+                        return false;
+                }
+        }
+
+        return true;
+}
+
+template<MatrixType M>
+bool IsUnitary(const M& matrix) {
+        return AreEqualMatrices(matrix * matrix.ConjugateTransposed(),
+                                Matrix<typename M::ElementType>::Identity(matrix.Rows()));
+}
 
 template<MatrixType M>
 bool IsDiagonal(const M& matrix) {
@@ -64,18 +81,6 @@ bool IsDiagonal(const M& matrix) {
                         if (!IsZero(matrix(i, j))) {
                                 return false;
                         }
-                }
-        }
-
-        return true;
-}
-
-template<MatrixType M>
-bool IsOrthogonal(const M& matrix) {
-        using T = M::ElementType;
-        for (Index row = 1; row <= matrix.Columns(); row++) {
-                if (!IsZero(matrix.GetColumn(row).GetVector2Norm() - T{1})) {
-                        return false;
                 }
         }
 

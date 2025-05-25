@@ -31,7 +31,7 @@ template<Core::MutableMatrixType M>
 void GivensLeftRotation(M& matrix,
                         Index upper_row, Index lower_row,
                         typename M::ElementType first, typename M::ElementType second) {
-        using T = M::ElementType;
+        using T = typename M::ElementType;
 
         auto [cos, sin] = GetGivensPair(first, second);
         for (Index i = 0; i < matrix.Columns(); i++) {
