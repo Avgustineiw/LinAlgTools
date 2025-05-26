@@ -38,11 +38,11 @@ Implementation::PairHessenberg<typename M::ElementType> HessenbergForm(const M& 
                                                               {column, matrix.Columns() - 1});
                 SubMatrix<T> submatrixH_right = H.GetSubMatrix({0, matrix.Rows() - 1},
                                                                {column + 1, matrix.Columns() - 1});
-                SubMatrix<T> submatrixQ = U.GetSubMatrix({column + 1, matrix.Rows() - 1},
+                SubMatrix<T> submatrixU = U.GetSubMatrix({column + 1, matrix.Rows() - 1},
                                                          {0, matrix.Rows() - 1});
 
                 HouseholderLeftRotation(submatrixH_left, vector);
-                HouseholderLeftRotation(submatrixQ, vector);
+                HouseholderLeftRotation(submatrixU, vector);
                 HouseholderRightRotation(submatrixH_right, vector.ConjugateTranspose());
         }
 

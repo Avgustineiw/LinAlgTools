@@ -19,7 +19,7 @@ constexpr int32_t SIZE_STEP = 1;
 constexpr int32_t MATRICES_PER_ITERATION = 10;
 }// namespace
 
-enum class Method
+enum class Algorithm 
 {
         HouseholderQR,
         GivensQR,
@@ -73,7 +73,7 @@ TimingResult CalculateStatistics(const std::vector<int64_t>& data) {
 }
 
 template<typename T = std::complex<long double>>
-TimingResult GetTimingStatistics(Method method,
+TimingResult GetTimingStatistics(Algorithm algorithm,
                                  RandomGenerator<T> generator,
                                  int32_t size, int32_t iterations) {
         std::vector<int64_t> data;
@@ -83,27 +83,27 @@ TimingResult GetTimingStatistics(Method method,
 
                 Clock::time_point start;
                 Clock::time_point end;
-                switch (method) {
-                        case Method::HouseholderQR: {
+                switch (algorithm) {
+                        case Algorithm::HouseholderQR: {
                                 start = Clock::now();
                                 auto result = LinAlgTools::Algorithm::HouseholderQR(matrix);
                                 end = Clock::now();
                                 break;
                         }
-                        case Method::GivensQR: {
+                        case Algorithm::GivensQR: {
                                 start = Clock::now();
                                 auto result = LinAlgTools::Algorithm::GivensQR(matrix);
                                 end = Clock::now();
                                 break;
                         }
-                        case Method::RealSchur: {
+                        case Algorithm::RealSchur: {
                                 start = Clock::now();
                                 auto result = LinAlgTools::Algorithm::RealSchur(matrix);
                                 end = Clock::now();
                                 break;
                         }
 
-                        case Method::NaiveSVD: {
+                        case Algorithm::NaiveSVD: {
                                 start = Clock::now();
                                 auto result = LinAlgTools::Algorithm::NaiveSVD(matrix);
                                 end = Clock::now();
@@ -122,32 +122,32 @@ TimingResult GetTimingStatistics(Method method,
 }
 
 template<typename T = std::complex<long double>>
-void RunPerformanceTest(Method method,
+void RunPerformanceTest(Algorithm algorithm,
                         int32_t min_size = MIN_SIZE, int32_t max_size = MAX_SIZE, 
                         int32_t size_step = SIZE_STEP, int32_t matrices_per_iteration = MATRICES_PER_ITERATION,
                         RandomGenerator<T> generator = RandomGenerator<T>(20)) {
-        std::string method_name;
-        switch (method) {
-                case Method::HouseholderQR:
-                        method_name = "HouseholderQR";
+        std::string algorithm_name;
+        switch (algorithm) {
+                case Algorithm::HouseholderQR:
+                        algorithm_name = "HouseholderQR";
                         break;
-                case Method::GivensQR:
-                        method_name = "GivensQR";
+                case Algorithm::GivensQR:
+                        algorithm_name = "GivensQR";
                         break;
-                case Method::RealSchur:
-                        method_name = "RealSchur";
+                case Algorithm::RealSchur:
+                        algorithm_name = "RealSchur";
                         break;
-                case Method::NaiveSVD:
-                        method_name = "NaiveSVD";
+                case Algorithm::NaiveSVD:
+                        algorithm_name = "NaiveSVD";
                         break;
                 default:
                         throw std::runtime_error("Unknown method");
         }
 
-        std::string filename = method_name + "_performance.csv";
+        std::string filename = algorithm_name + "_performance.csv";
         std::ofstream outFile(filename, std::ios::app);
 
-        std::cout << "\nPerformance Test (" << method_name << ")\n";
+        std::cout << "\nPerformance Test (" << algorithm_name << ")\n";
         std::cout << "---------------------------------\n";
         std::cout << std::setw(10) << "Size"
                   << std::setw(15) << "Mean (ms)"
@@ -160,7 +160,7 @@ void RunPerformanceTest(Method method,
         }
 
         for (int32_t size = min_size; size <= max_size; size += size_step) {
-                auto stats = GetTimingStatistics(method, generator, size, matrices_per_iteration);
+                auto stats = GetTimingStatistics(algorithm, generator, size, matrices_per_iteration);
 
                 std::cout << std::setw(10) << size
                           << std::setw(15) << stats.mean
@@ -169,7 +169,7 @@ void RunPerformanceTest(Method method,
                           << std::setw(15) << std::fixed << std::setprecision(2)
                           << stats.stddev << '\n';
 
-                outFile << method_name << ","
+                outFile << algorithm_name << ","
                         << size << ","
                         << stats.mean << ","
                         << stats.min << ","

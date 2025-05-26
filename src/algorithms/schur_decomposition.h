@@ -4,6 +4,7 @@
 #include "../types/matrix.h"
 #include "hessenberg.h"
 #include "qr_decomposition.h"
+#include "wilkinson_shift.h"
 
 namespace LinAlgTools::Algorithm {
 namespace Implementation {
@@ -24,13 +25,15 @@ Implementation::PairSchur<typename M::ElementType> RealSchur(const M& matrix,
                "Number of iterations must be positive");
         assert(matrix.Rows() == matrix.Columns() &&
                "Matrix must be square for Schur's decomposition");
+        using T = typename M::ElementType;
 
         auto [U, S] = HessenbergForm(matrix);
         for (int32_t k = 0; k < iterations * matrix.Columns(); k++) {
                 if (Core::IsUpperTriangular(S)) break;
-
-                auto [Q, R] = HouseholderQR(S);
-                S = R * Q;
+                
+                T shift = GetWilkinsonShift(S);
+                auto [Q, R] = HouseholderQR(S - shift * Matrix<T>::Identity(matrix.Rows()));
+                S = R * Q + shift * Matrix<T>::Identity(matrix.Rows());
                 U *= Q;
         }
 
