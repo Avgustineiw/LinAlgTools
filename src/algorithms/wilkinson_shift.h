@@ -8,7 +8,7 @@ namespace LinAlgTools::Algorithm {
 template<Core::MatrixType M>
 typename M::ElementType GetWilkinsonShift(const M& matrix) {
         using T = typename M::ElementType;
-        using Index = Core::Index;
+        using Index = Core::Indices::Index;
 
         Index n = matrix.Rows();
         Index m = n - 1;
@@ -17,7 +17,7 @@ typename M::ElementType GetWilkinsonShift(const M& matrix) {
         T a_nm = matrix(m, m - 1);
         T a_nn = matrix(m, m);
 
-        T delta = (a_mm - a_nn) / 2.0;
+        T delta = (a_mm - a_nn) / T{2};
         return a_nn - Core::sign(delta) * a_mn * a_mn / (std::abs(delta) + std::sqrt(delta * delta + a_mn * a_nm));
 }
 }//namespace LinAlgTools::Algorithm

@@ -2,7 +2,7 @@
 
 #include "../core/matrix_traits.h"
 #include "../types/matrix.h"
-#include "hessenberg.h"
+#include "hessenberg_form.h"
 #include "qr_decomposition.h"
 #include "wilkinson_shift.h"
 

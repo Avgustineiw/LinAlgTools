@@ -14,10 +14,9 @@ using namespace LinAlgTools::Algorithm;
 template<MatrixType M>
 bool checkSingularValues(const M& sigma) {
         using T = typename M::ElementType;
-        int32_t size = std::min(sigma.Rows(), sigma.Columns());
-        for (int32_t i = 0; i < size; i++) {
-                if (std::imag(sigma(i, i) != T{0}) ||
-                    std::real(sigma(i, i)) < 0.0) {
+        const Index size = std::min(sigma.Rows(), sigma.Columns());
+        for (Index i = 0; i < size; i++) {
+                if (std::imag(sigma(i, i)) != T{0} || std::real(sigma(i, i)) < 0.0) {
                         return false;
                 }
                 if (i < size - 1 &&
@@ -25,17 +24,16 @@ bool checkSingularValues(const M& sigma) {
                         return false;
                 }
         }
-
         return true;
 }
 
-template<MatrixType M, MatrixType U, MatrixType S, MatrixType V>
-bool CheckSVD(const M& matrix, const U& unitary_u, const S& sigma, const V& unitary_v) {
-        return AreEqualMatrices(matrix, unitary_u * sigma * unitary_v) &&
-               IsUnitary(unitary_u) &&
-               IsUnitary(unitary_v) &&
-               IsDiagonal(sigma) &&
-               checkSingularValues(sigma);
+template<MatrixType A, MatrixType L, MatrixType E, MatrixType R>
+bool CheckSVD(const A& matrix, const L& U, const E& S, const R& VT) {
+        return AreEqualMatrices(matrix, U * S * VT) &&
+               IsUnitary(U) &&
+               IsUnitary(VT) &&
+               IsDiagonal(S) &&
+               checkSingularValues(S);
 }
 
 TEST(TEST_SVD_DECOMPOSITION, SquareRealMatrix) {
@@ -52,11 +50,31 @@ TEST(TEST_SVD_DECOMPOSITION, RectangularRealMatrix) {
                             {5, 6}};
         auto [U, S, V] = Algorithm::NaiveSVD(A);
         EXPECT_TRUE(CheckSVD(A, U, S, V));
+
+        Matrix<double> B = {{1, 2, 3},
+                            {4, 5, 6}};
+        auto [U2, S2, V2] = Algorithm::NaiveSVD(B);
+        EXPECT_TRUE(CheckSVD(B, U2, S2, V2));
 }
 
 TEST(TEST_SVD_DECOMPOSITION, ComplexMatrix) {
-        Matrix<std::complex<double>> A = {{{1, 0}, {0, 1}},
-                                          {{0, -1}, {1, 0}}};
+        Matrix<std::complex<double>> A = {{{1, 1}, {0, 1}},
+                                          {{0, -1}, {1, 0}},
+                                          {{1, 0}, {0, -1}}};
+        auto [U, S, V] = Algorithm::NaiveSVD(A);
+        EXPECT_TRUE(CheckSVD(A, U, S, V));
+}
+
+TEST(TEST_SVD_DECOMPOSITION, SmallValues) {
+        Matrix<double> A = {{1e-10, 2e-10},
+                            {3e-10, 4e-10}};
+        auto [U, S, V] = Algorithm::NaiveSVD(A);
+        EXPECT_TRUE(CheckSVD(A, U, S, V));
+}
+
+TEST(TEST_SVD_DECOMPOSITION, ComplexSmallValues) {
+        Matrix<std::complex<double>> A = {{{1e-10, 1e-10}, {2e-10, -1e-10}},
+                                          {{3e-10, -2e-10}, {4e-10, 3e-10}}};
         auto [U, S, V] = Algorithm::NaiveSVD(A);
         EXPECT_TRUE(CheckSVD(A, U, S, V));
 }
@@ -67,6 +85,14 @@ TEST(TEST_SVD_DECOMPOSITION, SingularMatrix) {
         auto [U, S, V] = Algorithm::NaiveSVD(A);
         EXPECT_TRUE(CheckSVD(A, U, S, V));
         EXPECT_NEAR(S(1, 1), 0.0, 1e-10);
+}
+
+TEST(TEST_SVD_DECOMPOSITION, NearlySingularMatrix) {
+        Matrix<double> A = {{1, 1},
+                            {1, 1 + 1e-12}};
+        auto [U, S, V] = Algorithm::NaiveSVD(A);
+        EXPECT_TRUE(CheckSVD(A, U, S, V));
+        EXPECT_GT(S(0, 0), S(1, 1));
 }
 
 TEST(TEST_SVD_DECOMPOSITION, IdentityMatrix) {
@@ -84,10 +110,59 @@ TEST(TEST_SVD_DECOMPOSITION, ZeroMatrix) {
         EXPECT_TRUE(S == A);
 }
 
+TEST(TEST_SVD_DECOMPOSITION, DiagonalMatrix) {
+        Matrix<double> A = {{2, 0, 0},
+                            {0, 3, 0},
+                            {0, 0, 4}};
+        auto [U, S, V] = Algorithm::NaiveSVD(A);
+        EXPECT_TRUE(CheckSVD(A, U, S, V));
+
+        EXPECT_DOUBLE_EQ(S(0, 0), 4.0);
+        EXPECT_DOUBLE_EQ(S(1, 1), 3.0);
+        EXPECT_DOUBLE_EQ(S(2, 2), 2.0);
+}
+
 TEST(TEST_SVD_DECOMPOSITION, IllConditionedMatrix) {
         Matrix<double> A = {{1, 1e10},
                             {0, 1}};
         auto [U, S, V] = Algorithm::NaiveSVD(A);
         EXPECT_TRUE(CheckSVD(A, U, S, V));
+
+        EXPECT_GT(S(0, 0), S(1, 1));
+}
+
+TEST(TEST_SVD_DECOMPOSITION, ColumnVector) {
+        Matrix<double> A = {{1},
+                            {2},
+                            {3}};
+        auto [U, S, V] = Algorithm::NaiveSVD(A);
+        EXPECT_TRUE(CheckSVD(A, U, S, V));
+
+        EXPECT_GT(S(0, 0), 0.0);
+        EXPECT_DOUBLE_EQ(S(1, 1), 0.0);
+}
+
+TEST(TEST_SVD_DECOMPOSITION, RowVector) {
+        Matrix<double> A = {{1, 2, 3}};
+        auto [U, S, V] = Algorithm::NaiveSVD(A);
+        EXPECT_TRUE(CheckSVD(A, U, S, V));
+}
+
+TEST(TEST_SVD_DECOMPOSITION, SingleElementMatrix) {
+        Matrix<double> A = {{5}};
+        auto [U, S, V] = Algorithm::NaiveSVD(A);
+        EXPECT_TRUE(CheckSVD(A, U, S, V));
+        EXPECT_DOUBLE_EQ(S(0, 0), 5.0);
+}
+
+TEST(TEST_SVD_DECOMPOSITION, PresortedSingularValues) {
+        Matrix<double> A = {{3, 0},
+                            {0, 2},
+                            {0, 0}};
+        auto [U, S, V] = Algorithm::NaiveSVD(A);
+
+        EXPECT_TRUE(S(0, 0) >= S(1, 1));
+        EXPECT_NEAR(S(0, 0), 3.0, 1e-10);
+        EXPECT_NEAR(S(1, 1), 2.0, 1e-10);
 }
 

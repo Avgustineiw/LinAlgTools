@@ -14,7 +14,7 @@ struct TripletBidiagonal
 {
         Matrix<T> U;
         Matrix<T> B;
-        Matrix<T> V;
+        Matrix<T> VT;
 };
 }//namespace Implementation
 using Index = Core::Indices::Index;
@@ -25,7 +25,7 @@ Implementation::TripletBidiagonal<typename M::ElementType> Bidiagonalization(con
 
         Matrix<T> U = Matrix<T>::Identity(matrix.Rows());
         Matrix<T> B = matrix;
-        Matrix<T> V = Matrix<T>::Identity(matrix.Columns());
+        Matrix<T> VT = Matrix<T>::Identity(matrix.Columns());
 
         for (Index column = 0; column < std::min(matrix.Rows(), matrix.Columns()); column++) {
                 Matrix<T> column_vector = B.GetSubMatrix({column, matrix.Rows() - 1},
@@ -42,16 +42,16 @@ Implementation::TripletBidiagonal<typename M::ElementType> Bidiagonalization(con
                                                       {column + 1, matrix.Columns() - 1});
                 submatrixB = B.GetSubMatrix({column, matrix.Rows() - 1},
                                             {column+ 1, matrix.Columns() - 1});
-                SubMatrix<T> submatrixV = V.GetSubMatrix({0, matrix.Columns() - 1},
+                SubMatrix<T> submatrixVT = VT.GetSubMatrix({0, matrix.Columns() - 1},
                                                          {column+ 1, matrix.Columns() - 1});
                 HouseholderRightRotation(submatrixB, row_vector);
-                HouseholderRightRotation(submatrixV, row_vector);
+                HouseholderRightRotation(submatrixVT, row_vector);
         }
 
         U.ConjugateTranspose();
         B.RemoveZeros();
-        V.ConjugateTranspose();
-        return {std::move(U), std::move(B), std::move(V)};
+        VT.ConjugateTranspose();
+        return {std::move(U), std::move(B), std::move(VT)};
 }
 }// namespace LinAlgTools::Algorithm
 

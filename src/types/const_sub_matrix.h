@@ -82,21 +82,21 @@ public:
         ConstSubMatrix GetRow(Index row) const {
                 assert(pmatrix_ != nullptr &&
                        "Matrix pointer is null.");
-                assert(row > 0 && row <= Rows() &&
+                assert(row >= 0 && row < Rows() &&
                        "Incorrect row index.");
                 return ConstSubMatrix(*pmatrix_,
-                                      {rows_.begin + row - 1, rows_.begin + row - 1},
+                                      {rows_.begin + row, rows_.begin + row},
                                       {columns_.begin, columns_.end});
         }
 
         ConstSubMatrix GetColumn(Index column) const {
                 assert(pmatrix_ != nullptr &&
                        "Matrix pointer is null.");
-                assert(column > 0 && column <= Columns() &&
+                assert(column >= 0 && column < Columns() &&
                        "Incorrect column index.");
                 return ConstSubMatrix(*pmatrix_,
                                       {rows_.begin, rows_.end},
-                                      {columns_.begin + column - 1, columns_.begin + column - 1});
+                                      {columns_.begin + column, columns_.begin + column});
         }
 
         template<class Function>

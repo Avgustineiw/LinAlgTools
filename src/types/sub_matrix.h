@@ -91,21 +91,21 @@ public:
         SubMatrix GetRow(Index row) {
                 assert(pmatrix_ != nullptr &&
                        "Pointer is null");
-                assert(row > 0 && row <= Rows() &&
+                assert(row >= 0 && row < Rows() &&
                        "Incorrect row index.");
                 return SubMatrix(*pmatrix_,
-                                 {rows_.begin + row - 1, rows_.begin + row - 1},
+                                 {rows_.begin + row, rows_.begin + row},
                                  {columns_.begin, columns_.end});
         }
 
         SubMatrix GetColumn(Index column) {
                 assert(pmatrix_ != nullptr &&
                        "Pointer is null.");
-                assert(column > 0 && column <= Columns() &&
+                assert(column >= 0 && column < Columns() &&
                        "Incorrect column index.");
                 return SubMatrix(*pmatrix_,
                                  {rows_.begin, rows_.end},
-                                 {columns_.begin + column - 1, columns_.begin + column - 1});
+                                 {columns_.begin + column, columns_.begin + column});
         }
 
         Matrix<T> Diagonal() const {
