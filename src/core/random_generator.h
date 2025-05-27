@@ -85,7 +85,7 @@ private:
         std::mt19937 rng_;
         const int32_t minValue_;
         const int32_t maxValue_;
-        std::uniform_int_distribution<int32_t> distribution_;
+        std::uniform_real_distribution<long double> distribution_;
 };
 }// namespace LinAlgTools::Tests
 

@@ -28,14 +28,16 @@ Implementation::PairSchur<typename M::ElementType> RealSchur(const M& matrix,
         using T = typename M::ElementType;
 
         auto [U, S] = HessenbergForm(matrix);
-        for (int32_t k = 0; k < iterations * matrix.Columns(); k++) {
-                if (Core::IsUpperTriangular(S)) break;
-                
+        int32_t iteration = 0;
+
+        do {
                 T shift = GetWilkinsonShift(S);
                 auto [Q, R] = HouseholderQR(S - shift * Matrix<T>::Identity(matrix.Rows()));
                 S = R * Q + shift * Matrix<T>::Identity(matrix.Rows());
                 U *= Q;
-        }
+                iteration++;
+        } while (!Core::IsUpperTriangular(S) &&
+                 iteration < iterations * matrix.Columns());
 
         S.RemoveZeros();
         return {std::move(U), std::move(S)};

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../core/matrix_traits.h"
 #include "../core/indices.h"
+#include "../core/matrix_traits.h"
 #include "../core/matrix_utils.h"
 #include "../types/matrix.h"
 #include "bidiagonalization.h"
@@ -38,20 +38,23 @@ void SortSingularValues(M& U, M& S, M& VT) {
 
 template<Core::MatrixType M>
 Implementation::TripletSVD<typename M::ElementType> NaiveSVD(const M& matrix,
-                                                             const int32_t iterations = 50) {
+                                                             const int32_t iterations = 10) {
         assert(iterations > 0 &&
                "Number of iterations must be positive");
 
         auto [U, S, VT] = Bidiagonalization(matrix);
         VT.ConjugateTranspose();
+        int32_t iteration = 0;
 
-        for (int32_t k = 0; k < iterations * matrix.Columns(); k++) {
+        do {
                 auto [Q1, R1] = HouseholderQR(S);
                 auto [Q2, R2] = HouseholderQR(R1.ConjugateTransposed());
                 S = R2.ConjugateTransposed();
                 U *= Q1;
                 VT *= Q2;
-        }
+                iteration++;
+        } while (!Core::IsZero((matrix - S).GetFrobeniusNorm()) &&
+                 iteration < iterations * matrix.Columns());
 
         VT.ConjugateTranspose();
         Implementation::SortSingularValues(U, S, VT);

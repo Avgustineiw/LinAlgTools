@@ -19,6 +19,6 @@ TEST(TEST_PERFORMANCE_SVD, RealSchurPerformance) {
 }
 
 TEST(TEST_PERFORMANCE_SVD, NaiveSVDPerformance) {
-        RunPerformanceTest(Algorithm::NaiveSVD, 1, 25);
+        RunPerformanceTest(Algorithm::NaiveSVD, 1, 100);
 }
 
