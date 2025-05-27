@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../types/matrix.h"
+#include "is_complex.h"
 
 #include <cassert>
 #include <cstdint>
@@ -11,67 +12,60 @@
 namespace LinAlgTools::Core {
 namespace Implementation {
 template<typename T>
-constexpr T DefaultMin() {
-        if constexpr (std::is_integral_v<T>) {
-                return -100;
-        }
-        else {
-                return T{-1e-10};
-        }
-}
+struct UnderlyingT
+{
+        using type = T;
+};
 
 template<typename T>
-constexpr T DefaultMax() {
-        if constexpr (std::is_integral_v<T>) {
-                return 100;
-        }
-        else {
-                return T{1e+20};
-        }
-}
-}//namespace implementation
+struct UnderlyingT<std::complex<T>>
+{
+        using type = T;
+};
+
+template<typename T>
+using UnderlyingType = typename UnderlyingT<T>::type;
+}//namespace Implementation
 
 template<typename T>
 class RandomGenerator {
         using Index = Core::Indices::Index;
         using DistributionType = typename std::conditional<
-                std::is_integral_v<T>,
-                std::uniform_int_distribution<T>,
-                std::uniform_real_distribution<T>>::type;
+                std::is_integral_v<Implementation::UnderlyingType<T>>,
+                std::conditional_t<
+                        IsComplexType<T>,
+                        std::uniform_int_distribution<Implementation::UnderlyingType<T>>,
+                        std::uniform_int_distribution<T>>,
+                std::conditional_t<
+                        IsComplexType<T>,
+                        std::uniform_real_distribution<Implementation::UnderlyingType<T>>,
+                        std::uniform_real_distribution<T>>>::type;
 
 public:
         RandomGenerator(int32_t seed,
-                        T minValue = Implementation::DefaultMin<T>(), 
-                        T maxValue = Implementation::DefaultMax<T>()) 
+                        int32_t minValue = INT32_MIN,
+                        int32_t maxValue = INT32_MAX)
             : rng_(seed),
-              minValue_(minValue),
-              maxValue_(maxValue) {
+              minValue_(minValue), maxValue_(maxValue),
+              distribution_(minValue, maxValue) {
+                assert(minValue >= INT32_MIN &&
+                       minValue <= INT32_MAX &&
+                       "Invalid minimum value");
+                assert(maxValue >= INT32_MIN &&
+                       maxValue <= INT32_MAX &&
+                       "Invalid maximum value");
                 assert(minValue <= maxValue &&
                        "Invalid range");
-
-                if constexpr (std::is_integral_v<T>) {
-                        distribution_ = std::uniform_int_distribution<T>(minValue, maxValue);
-                }
-                else if constexpr (std::is_floating_point_v<T>) {
-                        distribution_ = std::uniform_real_distribution<T>(minValue, maxValue);
-                }
         }
 
         T GetRandomTypeValue() {
                 if constexpr (Core::IsComplexType<T>) {
                         using ValueType = typename T::value_type;
-                        std::uniform_real_distribution<ValueType> real_dist(minValue_, maxValue_);
-
-                        ValueType real = real_dist(rng_);
-                        ValueType imaginary = real_dist(rng_);
+                        ValueType real = distribution_(rng_);
+                        ValueType imaginary = distribution_(rng_);
                         return T{real, imaginary};
                 }
-                else if constexpr (std::is_integral_v<T>) {
-                        return distribution_(rng_);
-                }
-                else if constexpr (std::is_floating_point_v<T>) {
-                        return distribution_(rng_);
-                }
+                return distribution_(rng_);
         }
 
         int32_t GetRandomInt(int32_t from, int32_t to) {
@@ -125,3 +119,4 @@ private:
         DistributionType distribution_;
 };
 }//namespace LinAlgTools::Core
+
