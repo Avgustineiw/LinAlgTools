@@ -15,7 +15,7 @@ TEST(TEST_PERFORMANCE_QR, GivensQRPerformance) {
 }
 
 TEST(TEST_PERFORMANCE_SVD, RealSchurPerformance) {
-        RunPerformanceTest(Algorithm::RealSchur, 1, 50, 1, 1, RandomGenerator<long double>(20));
+        RunPerformanceTest(Algorithm::RealSchur, 1, 50, 10, 1, RandomGenerator<long double>(20));
 }
 
 TEST(TEST_PERFORMANCE_SVD, NaiveSVDPerformance) {

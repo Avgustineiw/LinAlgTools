@@ -4,26 +4,58 @@
 
 #include <cassert>
 #include <cstdint>
+#include <limits>
 #include <random>
+#include <type_traits>
 
 namespace LinAlgTools::Core {
+namespace Implementation {
+template<typename T>
+constexpr T DefaultMin() {
+        if constexpr (std::is_integral_v<T>) {
+                return -100;
+        }
+        else {
+                return T{-1e-10};
+        }
+}
+
+template<typename T>
+constexpr T DefaultMax() {
+        if constexpr (std::is_integral_v<T>) {
+                return 100;
+        }
+        else {
+                return T{1e+20};
+        }
+}
+}//namespace implementation
+
 template<typename T>
 class RandomGenerator {
         using Index = Core::Indices::Index;
+        using DistributionType = typename std::conditional<
+                std::is_integral_v<T>,
+                std::uniform_int_distribution<T>,
+                std::uniform_real_distribution<T>>::type;
 
 public:
         RandomGenerator(int32_t seed,
-                        int32_t minValue = INT32_MIN, int32_t maxValue = INT32_MAX)
+                        T minValue = Implementation::DefaultMin<T>(), 
+                        T maxValue = Implementation::DefaultMax<T>()) 
             : rng_(seed),
-              minValue_(minValue), maxValue_(maxValue),
-              distribution_(minValue, maxValue) {
-                assert(minValue >= INT32_MIN && minValue_ <= INT32_MAX &&
-                       "Incorrect minimum value overflow.");
-                assert(maxValue >= INT32_MIN && maxValue_ <= INT32_MAX &&
-                       "Incorrect maximum value overflow.");
+              minValue_(minValue),
+              maxValue_(maxValue) {
                 assert(minValue <= maxValue &&
                        "Invalid range");
-        };
+
+                if constexpr (std::is_integral_v<T>) {
+                        distribution_ = std::uniform_int_distribution<T>(minValue, maxValue);
+                }
+                else if constexpr (std::is_floating_point_v<T>) {
+                        distribution_ = std::uniform_real_distribution<T>(minValue, maxValue);
+                }
+        }
 
         T GetRandomTypeValue() {
                 if constexpr (Core::IsComplexType<T>) {
@@ -34,12 +66,17 @@ public:
                         ValueType imaginary = real_dist(rng_);
                         return T{real, imaginary};
                 }
-                return static_cast<T>(distribution_(rng_));
+                else if constexpr (std::is_integral_v<T>) {
+                        return distribution_(rng_);
+                }
+                else if constexpr (std::is_floating_point_v<T>) {
+                        return distribution_(rng_);
+                }
         }
 
         int32_t GetRandomInt(int32_t from, int32_t to) {
                 assert(from <= to &&
-                       "Invalid range: from must be less than or equal to to");
+                       "Invalid range");
                 std::uniform_int_distribution<int32_t> dist(from, to);
                 return dist(rng_);
         }
@@ -85,7 +122,6 @@ private:
         std::mt19937 rng_;
         const int32_t minValue_;
         const int32_t maxValue_;
-        std::uniform_real_distribution<long double> distribution_;
+        DistributionType distribution_;
 };
-}// namespace LinAlgTools::Tests
-
+}//namespace LinAlgTools::Core
