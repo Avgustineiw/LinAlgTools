@@ -1,9 +1,10 @@
 #include "benchmark_utils/algorithm_benchmark.h"
-#include "benchmark_utils/random_generator.h"
+#include "../../src/core/random_generator.h"
 
 #include <gtest/gtest.h>
 
 using namespace LinAlgTools::Tests::Utils;
+using namespace LinAlgTools::Core;
 
 TEST(TEST_PERFORMANCE_QR, HouseholderQRPerformance) {
         RunPerformanceTest(Algorithm::HouseholderQR, 1, 50);
@@ -14,7 +15,7 @@ TEST(TEST_PERFORMANCE_QR, GivensQRPerformance) {
 }
 
 TEST(TEST_PERFORMANCE_SVD, RealSchurPerformance) {
-        RunPerformanceTest(Algorithm::RealSchur, 1, 20, 1, 10, RandomGenerator<long double>(20));
+        RunPerformanceTest(Algorithm::RealSchur, 1, 50, 1, 10, RandomGenerator<long double>(20));
 }
 
 TEST(TEST_PERFORMANCE_SVD, NaiveSVDPerformance) {

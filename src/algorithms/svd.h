@@ -43,6 +43,8 @@ Implementation::TripletSVD<typename M::ElementType> NaiveSVD(const M& matrix,
                "Number of iterations must be positive");
 
         auto [U, S, VT] = Bidiagonalization(matrix);
+        VT.ConjugateTranspose();
+
         for (int32_t k = 0; k < iterations * matrix.Columns(); k++) {
                 auto [Q1, R1] = HouseholderQR(S);
                 auto [Q2, R2] = HouseholderQR(R1.ConjugateTransposed());

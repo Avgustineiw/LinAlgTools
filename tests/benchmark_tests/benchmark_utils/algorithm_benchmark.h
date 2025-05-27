@@ -3,7 +3,7 @@
 #include "../../../src/algorithms/qr_decomposition.h"
 #include "../../../src/algorithms/schur_decomposition.h"
 #include "../../../src/algorithms/svd.h"
-#include "random_generator.h"
+#include "../../../src/core/random_generator.h"
 
 #include <chrono>
 #include <complex>
@@ -74,7 +74,7 @@ TimingResult CalculateStatistics(const std::vector<int64_t>& data) {
 
 template<typename T = std::complex<long double>>
 TimingResult GetTimingStatistics(Algorithm algorithm,
-                                 RandomGenerator<T> generator,
+                                 Core::RandomGenerator<T> generator,
                                  int32_t size, int32_t iterations) {
         std::vector<int64_t> data;
 
@@ -125,7 +125,7 @@ template<typename T = std::complex<long double>>
 void RunPerformanceTest(Algorithm algorithm,
                         int32_t min_size = MIN_SIZE, int32_t max_size = MAX_SIZE, 
                         int32_t size_step = SIZE_STEP, int32_t matrices_per_iteration = MATRICES_PER_ITERATION,
-                        RandomGenerator<T> generator = RandomGenerator<T>(20)) {
+                        Core::RandomGenerator<T> generator = Core::RandomGenerator<T>(20)) {
         std::string algorithm_name;
         switch (algorithm) {
                 case Algorithm::HouseholderQR:

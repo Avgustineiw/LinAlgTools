@@ -1,18 +1,19 @@
 #pragma once
 
-#include "../../../src/types/matrix.h"
+#include "../types/matrix.h"
 
 #include <cassert>
 #include <cstdint>
 #include <random>
 
-namespace LinAlgTools::Tests {
+namespace LinAlgTools::Core {
 template<typename T>
 class RandomGenerator {
         using Index = Core::Indices::Index;
 
 public:
-        RandomGenerator(int32_t seed, int32_t minValue = INT32_MIN, int32_t maxValue = INT32_MAX)
+        RandomGenerator(int32_t seed,
+                        int32_t minValue = INT32_MIN, int32_t maxValue = INT32_MAX)
             : rng_(seed),
               minValue_(minValue), maxValue_(maxValue),
               distribution_(minValue, maxValue) {
