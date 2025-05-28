@@ -129,7 +129,7 @@ TEST(TEST_SUBMATRIX, Transpose) {
         EXPECT_EQ(sub(2, 1), 6);
 
         sub(0, 1) = 10;
-        EXPECT_EQ(mat(1, 0), 10);
+        EXPECT_EQ(mat(0, 1), 10);
 
         Matrix<std::complex<double>> cmat = {{1.0 + 1.0i, 2.0 + 2.0i},
                                              {3.0 + 3.0i, 4.0 + 4.0i}};

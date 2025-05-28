@@ -18,8 +18,7 @@ using Index = Core::Indices::Index;
 
 template<typename T>
 class Matrix {
-        using RowSlice = Core::Indices::RowSlice;
-        using ColumnSlice = Core::Indices::ColumnSlice;
+        using Slice = Core::Indices::Slice;
 
 public:
         using ElementType = std::remove_cv_t<T>;
@@ -71,14 +70,14 @@ public:
                 return ConstSubMatrix<T>(*this);
         }
 
-        SubMatrix<T> GetSubMatrix(RowSlice rows, ColumnSlice columns) {
-                return ToSubMatrix().GetSubMatrix({rows.begin, rows.end},
-                                                  {columns.begin, columns.end});
+        SubMatrix<T> GetSubMatrix(Slice rows, Slice columns) {
+                return ToSubMatrix().GetSubMatrix({rows.first, rows.last},
+                                                  {columns.first, columns.last});
         }
 
-        ConstSubMatrix<T> GetSubMatrix(RowSlice rows, ColumnSlice columns) const {
-                return ToSubMatrix().GetSubMatrix({rows.begin, rows.end},
-                                                  {columns.begin, columns.end});
+        ConstSubMatrix<T> GetSubMatrix(Slice rows, Slice columns) const {
+                return ToSubMatrix().GetSubMatrix({rows.first, rows.last},
+                                                  {columns.first, columns.last});
         }
 
         Index Rows() const {

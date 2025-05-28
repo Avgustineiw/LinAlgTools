@@ -3,6 +3,7 @@
 #include "../../../src/algorithms/qr_decomposition.h"
 #include "../../../src/algorithms/schur_decomposition.h"
 #include "../../../src/algorithms/svd.h"
+#include "../../../src/core/is_complex.h"
 #include "../../../src/core/random_generator.h"
 
 #include <cassert>
@@ -33,8 +34,31 @@ struct TimingResult
 
 using Clock = std::chrono::high_resolution_clock;
 using Ms = std::chrono::milliseconds;
-using namespace LinAlgTools::Tests;
-using namespace LinAlgTools::Tests::Utils;
+namespace Impl = LinAlgTools::Algorithm::Implementation;
+
+template<typename M>
+using ResultVariant = std::variant<
+        Impl::PairQR<typename M::ElementType>,
+        Impl::PairSchur<typename M::ElementType>,
+        Impl::PairHessenberg<typename M::ElementType>,
+        Impl::TripletSVD<typename M::ElementType>
+>;
+
+template<typename M>
+ResultVariant<M> RunAlgorithm(AlgorithmName algorithm, const M& matrix) {
+    switch (algorithm) {
+        case AlgorithmName::HouseholderQR:
+            return LinAlgTools::Algorithm::HouseholderQR(matrix);
+        case AlgorithmName::GivensQR:
+            return LinAlgTools::Algorithm::GivensQR(matrix);
+        case AlgorithmName::RealSchur:
+            return LinAlgTools::Algorithm::RealSchur(matrix);
+        case AlgorithmName::NaiveSVD:
+            return LinAlgTools::Algorithm::NaiveSVD(matrix);
+        default:
+                assert("Unknown algorithm");
+    }
+}
 
 inline TimingResult CalculateStatistics(const std::vector<double>& data) {
         TimingResult result;
@@ -69,65 +93,37 @@ inline TimingResult CalculateStatistics(const std::vector<double>& data) {
 
 template<typename T = std::complex<long double>>
 TimingResult GetTimingStatistics(AlgorithmName algorithm,
-                                 Core::RandomGenerator<T> generator,
-                                 int32_t size, int32_t iterations) {
-        std::vector<double> data;
+                                 Core::RandomGenerator generator,
+                                 int32_t size, int32_t iterations,
+                                 LinAlgTools::Core::UnderlyingType<T> min_value,
+                                 LinAlgTools::Core::UnderlyingType<T> max_value) {
+        std::vector<double> data(iterations);
 
         for (int32_t i = 0; i < iterations; i++) {
-                auto matrix = generator.GetRandomDenseMatrix(size, size, 1e-10, 1e+10);
+                auto matrix = generator.GetRandomDenseMatrix<T>(size, size, min_value, max_value);
 
-                Clock::time_point start;
-                Clock::time_point end;
-                switch (algorithm) {
-                        case AlgorithmName::HouseholderQR: {
-                                start = Clock::now();
-                                auto result = LinAlgTools::Algorithm::HouseholderQR(matrix);
-                                end = Clock::now();
-                                break;
-                        }
-                        case AlgorithmName::GivensQR: {
-                                start = Clock::now();
-                                auto result = LinAlgTools::Algorithm::GivensQR(matrix);
-                                end = Clock::now();
-                                break;
-                        }
-                        case AlgorithmName::RealSchur: {
-                                start = Clock::now();
-                                auto result = LinAlgTools::Algorithm::RealSchur(matrix);
-                                end = Clock::now();
-                                break;
-                        }
+                Clock::time_point start = Clock::now();
+                auto result = RunAlgorithm(algorithm, matrix);
+                Clock::time_point end = Clock::now();
 
-                        case AlgorithmName::NaiveSVD: {
-                                start = Clock::now();
-                                auto result = LinAlgTools::Algorithm::NaiveSVD(matrix);
-                                end = Clock::now();
-                                break;
-                        }
-                        default: {
-                                std::cout << "Invalid QR Algorithm";
-                                break;
-                        }
-                }
-
-                data.push_back(std::chrono::duration_cast<Ms>(end - start).count());
+                data[i] = std::chrono::duration_cast<Ms>(end - start).count();
         }
 
         return CalculateStatistics(data);
 }
 
-std::string GetNameOfAlgorithm(AlgorithmName algorithm) {
+inline std::string GetNameOfAlgorithm(AlgorithmName algorithm) {
         switch (algorithm) {
-                case Implementation::AlgorithmName::HouseholderQR:
+                case AlgorithmName::HouseholderQR:
                         return "HouseholderQR";
                         break;
-                case Implementation::AlgorithmName::GivensQR:
+                case AlgorithmName::GivensQR:
                         return "GivensQR";
                         break;
-                case Implementation::AlgorithmName::RealSchur:
+                case AlgorithmName::RealSchur:
                         return "RealSchur";
                         break;
-                case Implementation::AlgorithmName::NaiveSVD:
+                case AlgorithmName::NaiveSVD:
                         return "NaiveSVD";
                         break;
                 default:
@@ -137,13 +133,15 @@ std::string GetNameOfAlgorithm(AlgorithmName algorithm) {
 }//namespace Implementation
 
 template<typename T = std::complex<long double>>
-void RunPerformanceTest(Implementation::AlgorithmName algorithm,
+void RunPerformanceTest(AlgorithmName algorithm,
                         int32_t min_size = 1, int32_t max_size = 100,
                         int32_t size_step = 1, int32_t matrices_per_iteration = 10,
-                        Core::RandomGenerator<T> generator = Core::RandomGenerator<T>(20)) {
+                        Core::RandomGenerator generator = Core::RandomGenerator(20),
+                        LinAlgTools::Core::UnderlyingType<T> min_value = 1e-10,
+                        LinAlgTools::Core::UnderlyingType<T> max_value = 1e+10) {
         std::string algorithm_name = Implementation::GetNameOfAlgorithm(algorithm);
 
-        std::string filename = algorithm_name + "_performance.csv";
+        std::filesystem::path filename = algorithm_name + "_performance.csv";
         std::ofstream outFile(filename, std::ios::app);
 
         std::cout << "\nPerformance Test (" << algorithm_name << ")\n";
@@ -157,7 +155,9 @@ void RunPerformanceTest(Implementation::AlgorithmName algorithm,
         outFile << "Algorithm,Size,Mean(ms),Min(ms),Max (ms),StdDev\n";
 
         for (int32_t size = min_size; size <= max_size; size += size_step) {
-                auto stats = Implementation::GetTimingStatistics(algorithm, generator, size, matrices_per_iteration);
+                auto stats = Implementation::GetTimingStatistics(algorithm, generator,
+                                                                 size, matrices_per_iteration,
+                                                                 min_value, max_value);
 
                 std::cout << std::setw(10) << size
                           << std::setw(15) << stats.mean

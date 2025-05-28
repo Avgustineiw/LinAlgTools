@@ -11,15 +11,15 @@
 namespace LinAlgTools::Core {
 using Index = Indices::Index;
 
-inline constexpr long double EPSILON = 1e-10;
+static constexpr long double epsilon = 1e-10;
 
 template<typename T>
 bool IsZero(const T& value) {
         if constexpr (IsComplexType<T>) {
-                return std::norm(value) < EPSILON;
+                return std::norm(value) < epsilon;
         }
         else {
-                return std::abs(value) < EPSILON;
+                return std::abs(value) < epsilon;
         }
 }
 

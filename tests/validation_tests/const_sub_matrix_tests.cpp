@@ -43,14 +43,25 @@ TEST(TEST_CONST_SUBMATRIX, SubMatrixOperations) {
                               {7, 8, 9}};
         ConstSubMatrix<double> sub(mat);
 
-        auto sub_sub = sub.GetConstSubMatrix({1, 2}, {0, 1});
+        auto sub_sub = sub.GetSubMatrix({1, 2}, {0, 1});
         Matrix<double> expected = {{4, 5},
                                    {7, 8}};
         EXPECT_EQ(sub_sub, expected);
 
-        auto full_sub = sub.GetConstSubMatrix({0, 2}, {0, 2});
+        auto full_sub = sub.GetSubMatrix({0, 2}, {0, 2});
         EXPECT_EQ(full_sub, mat);
 }
+
+TEST(TEST_CONST_SUBMATRIX, ConstSubMatrixOperations) {
+        Matrix<double> mat = {{1, 2, 3},
+                              {4, 5, 6},
+                              {7, 8, 9}};
+        SubMatrix<double> sub(mat);
+        ConstSubMatrix<double> csub = sub.Transpose();
+        sub *= 5;
+        EXPECT_EQ(mat, csub);
+}
+
 
 TEST(TEST_CONST_SUBMATRIX, RowAndColumnAccess) {
         Matrix<double> mat = {{1, 2, 3},
@@ -201,4 +212,3 @@ TEST(TEST_CONST_SUBMATRIX, MoveOperations) {
         EXPECT_EQ(move_assigned.Rows(), 2);
         EXPECT_EQ(move_assigned(0, 0), 1);
 }
-

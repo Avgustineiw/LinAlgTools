@@ -13,34 +13,50 @@ namespace LinAlgTools {
 template<typename T>
 class ConstSubMatrix {
         using Index = Core::Indices::Index;
-        using RowSlice = Core::Indices::RowSlice;
-        using ColumnSlice = Core::Indices::ColumnSlice;
+        using Slice = Core::Indices::Slice;
 
 public:
         using ElementType = std::remove_cv_t<T>;
 
-        ConstSubMatrix(const Matrix<T>& matrix, RowSlice rows = {0, -1}, ColumnSlice columns = {0, -1})
+        /*
+        * Slicing uses inclusive bounds [first, last], numering from 0
+        * Columns = {0, 1} will include both columns 0 and 1
+        */
+        ConstSubMatrix(const Matrix<T>& matrix, Slice rows = {0, -1}, Slice columns = {0, -1})
             : pmatrix_(&matrix),
-              rows_({rows.begin, rows.end}),
-              columns_({columns.begin, columns.end}) {
-                assert(rows.begin > -1 && rows.end < matrix.Rows() &&
-                       columns.begin > -1 && columns.end < matrix.Columns() &&
+              rows_({rows.first, rows.last}),
+              columns_({columns.first, columns.last}) {
+                assert(rows_.first > -1 && rows_.first < matrix.Rows() &&
+                       rows_.last >= -1 && rows_.last < matrix.Rows() &&
+                       columns_.first > -1 && columns_.first < matrix.Columns() &&
+                       columns_.last >= -1 && columns_.last < matrix.Columns() &&
                        "Slice must be inside the matrix.");
 
-                if (rows.end == -1) {
-                        rows_.end = matrix.Rows() - 1;
+                if (rows.last == -1) {
+                        rows_.last = matrix.Rows() - 1;
                 }
-                if (columns.end == -1) {
-                        columns_.end = matrix.Columns() - 1;
+                if (columns.last == -1) {
+                        columns_.last = matrix.Columns() - 1;
                 }
+
+                assert(rows_.first <= rows_.last &&
+                       columns_.first <= columns_.last);
+        }
+
+        ConstSubMatrix(const SubMatrix<T>& rhs)
+            : pmatrix_(rhs.pmatrix_),
+              rows_(rhs.rows_),
+              columns_(rhs.columns_) {
+                assert(rhs.pmatrix_ != nullptr 
+                       && "Matrix pointer is null");
         }
 
         ConstSubMatrix(const ConstSubMatrix& rhs) = default;
 
         ConstSubMatrix(ConstSubMatrix&& rhs) noexcept
             : pmatrix_(std::exchange(rhs.pmatrix_, nullptr)),
-              rows_(std::exchange(rhs.rows_, {0, 1})),
-              columns_(std::exchange(rhs.columns_, {0, 1})) {};
+              rows_(std::exchange(rhs.rows_, {0, -1})),
+              columns_(std::exchange(rhs.columns_, {0, -1})) {};
 
         ConstSubMatrix(Matrix<T>&& rhs) = delete;
 
@@ -48,35 +64,35 @@ public:
 
         ConstSubMatrix& operator=(ConstSubMatrix&& rhs) noexcept {
                 pmatrix_ = std::exchange(rhs.pmatrix_, nullptr);
-                rows_ = std::exchange(rhs.rows_, {0, 1});
-                columns_ = std::exchange(rhs.columns_, {0, 1});
+                rows_ = std::exchange(rhs.rows_, {0, -1});
+                columns_ = std::exchange(rhs.columns_, {0, -1});
                 return *this;
         }
 
-        ConstSubMatrix GetConstSubMatrix(RowSlice rows, ColumnSlice columns) const {
+        ConstSubMatrix GetSubMatrix(Slice rows, Slice columns) const {
                 assert(pmatrix_ != nullptr &&
                        "Matrix pointer is null.");
-                assert(rows_.begin + rows.begin < Rows() &&
-                       rows_.begin + rows.end <= Rows() &&
-                       columns_.begin + columns.begin < Columns() &&
-                       columns_.begin + columns.end <= Columns() &&
+                assert(rows_.first + rows.first < Rows() &&
+                       rows_.first + rows.last <= Rows() &&
+                       columns_.first + columns.first < Columns() &&
+                       columns_.first + columns.last <= Columns() &&
                        "Slice must be inside the matrix.");
 
                 return ConstSubMatrix<T>(*pmatrix_,
-                                         {rows_.begin + rows.begin, rows_.begin + rows.end},
-                                         {columns_.begin + columns.begin, columns_.begin + columns.end});
+                                         {rows_.first + rows.first, rows_.first + rows.last},
+                                         {columns_.first + columns.first, columns_.first + columns.last});
         }
 
         Index Rows() const {
                 assert(pmatrix_ != nullptr &&
                        "Matrix pointer is null.");
-                return rows_.end - rows_.begin + 1;
+                return rows_.last - rows_.first + 1;
         }
 
         Index Columns() const {
                 assert(pmatrix_ != nullptr &&
                        "Matrix pointer is null.");
-                return columns_.end - columns_.begin + 1;
+                return columns_.last - columns_.first + 1;
         }
 
         ConstSubMatrix GetRow(Index row) const {
@@ -85,8 +101,8 @@ public:
                 assert(row >= 0 && row < Rows() &&
                        "Incorrect row index.");
                 return ConstSubMatrix(*pmatrix_,
-                                      {rows_.begin + row, rows_.begin + row},
-                                      {columns_.begin, columns_.end});
+                                      {rows_.first + row, rows_.first + row},
+                                      {columns_.first, columns_.last});
         }
 
         ConstSubMatrix GetColumn(Index column) const {
@@ -95,8 +111,8 @@ public:
                 assert(column >= 0 && column < Columns() &&
                        "Incorrect column index.");
                 return ConstSubMatrix(*pmatrix_,
-                                      {rows_.begin, rows_.end},
-                                      {columns_.begin + column, columns_.begin + column});
+                                      {rows_.first, rows_.last},
+                                      {columns_.first + column, columns_.first + column});
         }
 
         template<class Function>
@@ -170,7 +186,7 @@ public:
         T operator()(Index row, Index column) const {
                 assert(pmatrix_ != nullptr &&
                        "Matrix pointer is null.");
-                return (*pmatrix_)(rows_.begin + row, columns_.begin + column);
+                return (*pmatrix_)(rows_.first + row, columns_.first + column);
         }
 
         friend std::ostream& operator<<(std::ostream& os, const ConstSubMatrix& matrix) {
@@ -201,9 +217,8 @@ private:
         }
 
         const Matrix<T>* pmatrix_;
-        RowSlice rows_;
-        ColumnSlice columns_;
-        bool transposed_ = false;
+        Slice rows_;
+        Slice columns_;
 };
 }//namespace LinAlgTools
 

@@ -7,15 +7,15 @@ using namespace LinAlgTools::Tests::Utils;
 using namespace LinAlgTools::Core;
 
 TEST(TEST_PERFORMANCE_QR, HouseholderQRPerformance) {
-        RunPerformanceTest(AlgorithmName::HouseholderQR, 1, 50);
+        RunPerformanceTest(AlgorithmName::HouseholderQR, 1, 100);
 }
 
 TEST(TEST_PERFORMANCE_QR, GivensQRPerformance) {
-        RunPerformanceTest(AlgorithmName::GivensQR, 1, 50);
+        RunPerformanceTest(AlgorithmName::GivensQR, 1, 100);
 }
 
 TEST(TEST_PERFORMANCE_SVD, RealSchurPerformance) {
-        RunPerformanceTest(AlgorithmName::RealSchur, 1, 100, 1, 10, RandomGenerator<long double>(20));
+        RunPerformanceTest<double>(AlgorithmName::RealSchur, 1, 100);
 }
 
 TEST(TEST_PERFORMANCE_SVD, NaiveSVDPerformance) {
