@@ -11,6 +11,7 @@ using namespace LinAlgTools;
 using namespace LinAlgTools::Core;
 using namespace LinAlgTools::Algorithm;
 
+namespace {
 template<MatrixType M>
 bool checkSingularValues(const M& sigma) {
         using T = typename M::ElementType;
@@ -25,6 +26,7 @@ bool checkSingularValues(const M& sigma) {
                 }
         }
         return true;
+}
 }
 
 template<MatrixType A, MatrixType L, MatrixType E, MatrixType R>

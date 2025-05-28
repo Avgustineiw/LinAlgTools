@@ -10,12 +10,14 @@ using namespace LinAlgTools;
 using namespace LinAlgTools::Core;
 using namespace LinAlgTools::Algorithm;
 
+namespace {
 template<MatrixType M, MatrixType U, MatrixType H>
 bool CheckHessenberg(const M& matrix, const U& unitary, const H& hessenberg) {
         return AreEqualMatrices(matrix, unitary * hessenberg * unitary.ConjugateTransposed()) &&
                IsUnitary(unitary) &&
                IsUpperHessenberg(hessenberg);
 }
+} //namespace 
 
 TEST(TEST_HESSENBERG_FORM, SquareRealMatrix) {
         Matrix<double> A = {{1, 2, 3, 4},

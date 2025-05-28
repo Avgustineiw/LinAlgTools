@@ -25,7 +25,8 @@ public:
             : pmatrix_(&matrix),
               rows_({rows.begin, rows.end}),
               columns_({columns.begin, columns.end}) {
-                assert(rows.begin > -1 && rows.end < matrix.Rows() &&
+                assert(rows.begin > -1 &&
+                       rows.end < matrix.Rows() &&
                        columns.begin > -1 && columns.end < matrix.Columns() &&
                        "Slice must be inside the matrix.");
 
@@ -116,11 +117,11 @@ public:
                 return ToConstSubMatrix().Trace();
         }
 
-        T GetVector2Norm() const {
+        double GetVector2Norm() const {
                 return ToConstSubMatrix().GetVector2Norm();
         }
 
-        T GetFrobeniusNorm() const {
+        double GetFrobeniusNorm() const {
                 return ToConstSubMatrix().GetFrobeniusNorm();
         }
 
@@ -129,7 +130,7 @@ public:
                 assert(pmatrix_ != nullptr &&
                        "Matrix pointer is null.");
 
-                T norm = GetVector2Norm();
+                T norm = static_cast<T>(GetVector2Norm());
                 if (!Core::IsZero(norm)) {
                         *this /= norm;
                 }

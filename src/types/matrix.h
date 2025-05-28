@@ -160,11 +160,11 @@ public:
                 return *this;
         }
 
-        T GetVector2Norm() const {
+        double GetVector2Norm() const {
                 return ToSubMatrix().GetVector2Norm();
         }
 
-        T GetFrobeniusNorm() const {
+        double GetFrobeniusNorm() const {
                 return ToSubMatrix().GetFrobeniusNorm();
         }
 

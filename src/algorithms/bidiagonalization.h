@@ -43,7 +43,7 @@ Implementation::TripletBidiagonal<typename M::ElementType> Bidiagonalization(con
                 submatrixB = B.GetSubMatrix({column, matrix.Rows() - 1},
                                             {column+ 1, matrix.Columns() - 1});
                 SubMatrix<T> submatrixVT = VT.GetSubMatrix({0, matrix.Columns() - 1},
-                                                         {column+ 1, matrix.Columns() - 1});
+                                                           {column+ 1, matrix.Columns() - 1});
                 HouseholderRightRotation(submatrixB, row_vector);
                 HouseholderRightRotation(submatrixVT, row_vector);
         }

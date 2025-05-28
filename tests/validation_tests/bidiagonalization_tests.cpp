@@ -10,6 +10,7 @@ using namespace LinAlgTools;
 using namespace LinAlgTools::Core;
 using namespace LinAlgTools::Algorithm;
 
+namespace {
 template<MatrixType M, MatrixType U, MatrixType B, MatrixType VT>
 bool CheckBidiagonalization(const M& matrix, const U& unitary_u, const B& bidiagonal, const VT& unitary_vt) {
         return AreEqualMatrices(matrix, unitary_u * bidiagonal * unitary_vt) &&
@@ -17,6 +18,7 @@ bool CheckBidiagonalization(const M& matrix, const U& unitary_u, const B& bidiag
                IsUnitary(unitary_vt) &&
                IsBidiagonal(bidiagonal);
 }
+} //namespace
 
 TEST(TEST_BIDIAGONALIZATION, SquareRealMatrix) {
         Matrix<double> A = {{1, 2, 3, 4},

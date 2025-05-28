@@ -18,7 +18,7 @@ struct PairSchur
 
 template<Core::MatrixType M>
 Implementation::PairSchur<typename M::ElementType> RealSchur(const M& matrix,
-                                                             const int32_t iterations = 50) {
+                                                             const int32_t iterations = 100) {
         assert(!Core::IsComplexType<typename M::ElementType> &&
                "Real Schur Decomposition only for real matrices");
         assert(iterations > 0 &&
@@ -37,10 +37,9 @@ Implementation::PairSchur<typename M::ElementType> RealSchur(const M& matrix,
                 U *= Q;
                 iteration++;
         } while (!Core::IsUpperTriangular(S) &&
-                 iteration < iterations * matrix.Columns());
+                 iteration < iterations);
 
         S.RemoveZeros();
         return {std::move(U), std::move(S)};
 }
 }//namespace LinAlgTools::Algorithm
-

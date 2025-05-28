@@ -14,11 +14,13 @@ using namespace std::complex_literals;
 template<typename T = double>
 using Index = Core::Indices::Index;
 
+namespace {
 template<MatrixType M, MatrixType F, MatrixType S>
 bool CheckQR(const M& matrix, const F& Q, const S& R) {
         return (AreEqualMatrices(matrix, Q * R) &&
-                IsOrthogonal(Q) &&
+                IsUnitary(Q) &&
                 IsUpperTriangular(R));
+}
 }
 
 TEST(TEST_QR_DECOMPOSITION, HouseholderSquareMatrix) {

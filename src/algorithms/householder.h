@@ -3,6 +3,7 @@
 #include "../core/math_utils.h"
 #include "../core/matrix_traits.h"
 #include "../types/matrix.h"
+#include "../core/is_complex.h"
 
 #include <cassert>
 
@@ -11,9 +12,15 @@ template<Core::MatrixType M>
 Matrix<typename M::ElementType> HouseholderVectorReduction(const M& vector) {
         assert(vector.Rows() == 1 || vector.Columns() == 1 &&
                                              "Householder reduction is only applicable to vectors");
+        using T = typename M::ElementType;
 
         auto result = vector;
-        result(0, 0) -= Core::sign(vector(0, 0)) * vector.GetVector2Norm();
+        if constexpr (Core::IsComplexType<T>) {
+                result(0, 0) -= Core::sign(vector(0, 0)) * std::complex<typename T::value_type>(vector.GetVector2Norm());
+        }
+        else {
+                result(0, 0) -= Core::sign(vector(0, 0)) * vector.GetVector2Norm();
+        }
         result.Normalize();
         return {std::move(result)};
 }

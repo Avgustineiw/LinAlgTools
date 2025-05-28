@@ -5,6 +5,7 @@
 #include "../../../src/algorithms/svd.h"
 #include "../../../src/core/random_generator.h"
 
+#include <cassert>
 #include <chrono>
 #include <complex>
 #include <cstdint>
@@ -12,14 +13,7 @@
 #include <gtest/gtest.h>
 
 namespace LinAlgTools::Tests::Utils {
-namespace {
-constexpr int32_t MIN_SIZE = 1;
-constexpr int32_t MAX_SIZE = 100;
-constexpr int32_t SIZE_STEP = 1;
-constexpr int32_t MATRICES_PER_ITERATION = 10;
-}// namespace
-
-enum class Algorithm 
+enum class AlgorithmName
 {
         HouseholderQR,
         GivensQR,
@@ -27,11 +21,12 @@ enum class Algorithm
         NaiveSVD,
 };
 
+namespace Implementation {
 struct TimingResult
 {
-        int64_t mean = 0;
-        int64_t min = 0;
-        int64_t max = 0;
+        double mean = 0;
+        double min = 0;
+        double max = 0;
         double stddev = 0.0;
         size_t count = 0;
 };
@@ -41,7 +36,7 @@ using Ms = std::chrono::milliseconds;
 using namespace LinAlgTools::Tests;
 using namespace LinAlgTools::Tests::Utils;
 
-TimingResult CalculateStatistics(const std::vector<int64_t>& data) {
+inline TimingResult CalculateStatistics(const std::vector<double>& data) {
         TimingResult result;
         if (data.empty()) {
                 return result;
@@ -51,7 +46,7 @@ TimingResult CalculateStatistics(const std::vector<int64_t>& data) {
 
         result.min = data[0];
         result.max = data[0];
-        int64_t sum = 0;
+        double sum = 0;
 
         for (const auto t: data) {
                 sum += t;
@@ -59,7 +54,7 @@ TimingResult CalculateStatistics(const std::vector<int64_t>& data) {
                 if (t > result.max) result.max = t;
         }
 
-        result.mean = sum / static_cast<int64_t>(result.count);
+        result.mean = sum / static_cast<double>(result.count);
 
         if (result.count > 1) {
                 double variance = 0.0;
@@ -73,37 +68,37 @@ TimingResult CalculateStatistics(const std::vector<int64_t>& data) {
 }
 
 template<typename T = std::complex<long double>>
-TimingResult GetTimingStatistics(Algorithm algorithm,
+TimingResult GetTimingStatistics(AlgorithmName algorithm,
                                  Core::RandomGenerator<T> generator,
                                  int32_t size, int32_t iterations) {
-        std::vector<int64_t> data;
+        std::vector<double> data;
 
-        for (int i = 0; i < iterations; i++) {
-                auto matrix = generator.GetRandomSparseMatrix(size);
+        for (int32_t i = 0; i < iterations; i++) {
+                auto matrix = generator.GetRandomDenseMatrix(size, size, 1e-10, 1e+10);
 
                 Clock::time_point start;
                 Clock::time_point end;
                 switch (algorithm) {
-                        case Algorithm::HouseholderQR: {
+                        case AlgorithmName::HouseholderQR: {
                                 start = Clock::now();
                                 auto result = LinAlgTools::Algorithm::HouseholderQR(matrix);
                                 end = Clock::now();
                                 break;
                         }
-                        case Algorithm::GivensQR: {
+                        case AlgorithmName::GivensQR: {
                                 start = Clock::now();
                                 auto result = LinAlgTools::Algorithm::GivensQR(matrix);
                                 end = Clock::now();
                                 break;
                         }
-                        case Algorithm::RealSchur: {
+                        case AlgorithmName::RealSchur: {
                                 start = Clock::now();
                                 auto result = LinAlgTools::Algorithm::RealSchur(matrix);
                                 end = Clock::now();
                                 break;
                         }
 
-                        case Algorithm::NaiveSVD: {
+                        case AlgorithmName::NaiveSVD: {
                                 start = Clock::now();
                                 auto result = LinAlgTools::Algorithm::NaiveSVD(matrix);
                                 end = Clock::now();
@@ -121,28 +116,32 @@ TimingResult GetTimingStatistics(Algorithm algorithm,
         return CalculateStatistics(data);
 }
 
-template<typename T = std::complex<long double>>
-void RunPerformanceTest(Algorithm algorithm,
-                        int32_t min_size = MIN_SIZE, int32_t max_size = MAX_SIZE, 
-                        int32_t size_step = SIZE_STEP, int32_t matrices_per_iteration = MATRICES_PER_ITERATION,
-                        Core::RandomGenerator<T> generator = Core::RandomGenerator<T>(20)) {
-        std::string algorithm_name;
+std::string GetNameOfAlgorithm(AlgorithmName algorithm) {
         switch (algorithm) {
-                case Algorithm::HouseholderQR:
-                        algorithm_name = "HouseholderQR";
+                case Implementation::AlgorithmName::HouseholderQR:
+                        return "HouseholderQR";
                         break;
-                case Algorithm::GivensQR:
-                        algorithm_name = "GivensQR";
+                case Implementation::AlgorithmName::GivensQR:
+                        return "GivensQR";
                         break;
-                case Algorithm::RealSchur:
-                        algorithm_name = "RealSchur";
+                case Implementation::AlgorithmName::RealSchur:
+                        return "RealSchur";
                         break;
-                case Algorithm::NaiveSVD:
-                        algorithm_name = "NaiveSVD";
+                case Implementation::AlgorithmName::NaiveSVD:
+                        return "NaiveSVD";
                         break;
                 default:
-                        throw std::runtime_error("Unknown method");
+                        assert("Unknown algorithm");
         }
+}
+}//namespace Implementation
+
+template<typename T = std::complex<long double>>
+void RunPerformanceTest(Implementation::AlgorithmName algorithm,
+                        int32_t min_size = 1, int32_t max_size = 100,
+                        int32_t size_step = 1, int32_t matrices_per_iteration = 10,
+                        Core::RandomGenerator<T> generator = Core::RandomGenerator<T>(20)) {
+        std::string algorithm_name = Implementation::GetNameOfAlgorithm(algorithm);
 
         std::string filename = algorithm_name + "_performance.csv";
         std::ofstream outFile(filename, std::ios::app);
@@ -155,12 +154,10 @@ void RunPerformanceTest(Algorithm algorithm,
                   << std::setw(15) << "Max (ms)"
                   << std::setw(15) << "StdDev\n";
 
-        if (outFile.tellp() == 0) {
-                outFile << "Algorithm,Size,Mean (ms),Min (ms),Max (ms),StdDev\n";
-        }
+        outFile << "Algorithm,Size,Mean(ms),Min(ms),Max (ms),StdDev\n";
 
         for (int32_t size = min_size; size <= max_size; size += size_step) {
-                auto stats = GetTimingStatistics(algorithm, generator, size, matrices_per_iteration);
+                auto stats = Implementation::GetTimingStatistics(algorithm, generator, size, matrices_per_iteration);
 
                 std::cout << std::setw(10) << size
                           << std::setw(15) << stats.mean
@@ -178,7 +175,6 @@ void RunPerformanceTest(Algorithm algorithm,
                         << stats.stddev << '\n';
         }
 
-        outFile.close();
         std::cout << "\nResults saved to: " << filename << '\n';
 }
 }//namespace LinAlgTools::Tests::Utils

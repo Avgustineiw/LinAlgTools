@@ -56,14 +56,8 @@ bool AreEqualMatrices(const F& lhs, const S& rhs) {
 
 template<MatrixType M>
 bool IsOrthogonal(const M& matrix) {
-        using T = typename M::ElementType;
-        for (Index row = 0; row < matrix.Columns(); row++) {
-                if (!IsZero(matrix.GetColumn(row).GetVector2Norm() - T{1})) {
-                        return false;
-                }
-        }
-
-        return true;
+        return AreEqualMatrices(matrix * matrix.Transposed(),
+                                Matrix<typename M::ElementType>::Identity(matrix.Rows()));
 }
 
 template<MatrixType M>
@@ -136,24 +130,23 @@ bool IsBidiagonal(const M& matrix) {
 
 template<MatrixType M>
 bool IsTridiagonal(const M& matrix) {
-    using Index = typename Core::Indices::Index;
-    
-    for (Index i = 2; i < matrix.Rows(); ++i) {
-        for (Index j = 0; j < i - 1; ++j) {
-            if (!IsZero(matrix(i, j))) {
-                return false;
-            }
+        using Index = typename Core::Indices::Index;
+
+        for (Index i = 2; i < matrix.Rows(); ++i) {
+                for (Index j = 0; j < i - 1; ++j) {
+                        if (!IsZero(matrix(i, j))) {
+                                return false;
+                        }
+                }
         }
-    }
-    for (Index j = 2; j < matrix.Columns(); ++j) {
-        for (Index i = 0; i < j - 1; ++i) {
-            if (!IsZero(matrix(i, j))) {
-                return false;
-            }
+        for (Index j = 2; j < matrix.Columns(); ++j) {
+                for (Index i = 0; i < j - 1; ++i) {
+                        if (!IsZero(matrix(i, j))) {
+                                return false;
+                        }
+                }
         }
-    }
-    
-    return true;
+
+        return true;
 }
 }// namespace LinAlgTools::Core
-

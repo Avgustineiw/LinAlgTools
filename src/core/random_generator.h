@@ -30,42 +30,29 @@ using UnderlyingType = typename UnderlyingT<T>::type;
 template<typename T>
 class RandomGenerator {
         using Index = Core::Indices::Index;
+        using BaseType = Implementation::UnderlyingType<T>;
         using DistributionType = typename std::conditional<
-                std::is_integral_v<Implementation::UnderlyingType<T>>,
+                std::is_integral_v<BaseType>,
                 std::conditional_t<
                         IsComplexType<T>,
-                        std::uniform_int_distribution<Implementation::UnderlyingType<T>>,
+                        std::uniform_int_distribution<BaseType>,
                         std::uniform_int_distribution<T>>,
                 std::conditional_t<
                         IsComplexType<T>,
-                        std::uniform_real_distribution<Implementation::UnderlyingType<T>>,
+                        std::uniform_real_distribution<BaseType>,
                         std::uniform_real_distribution<T>>>::type;
 
 public:
-        RandomGenerator(int32_t seed,
-                        int32_t minValue = INT32_MIN,
-                        int32_t maxValue = INT32_MAX)
-            : rng_(seed),
-              minValue_(minValue), maxValue_(maxValue),
-              distribution_(minValue, maxValue) {
-                assert(minValue >= INT32_MIN &&
-                       minValue <= INT32_MAX &&
-                       "Invalid minimum value");
-                assert(maxValue >= INT32_MIN &&
-                       maxValue <= INT32_MAX &&
-                       "Invalid maximum value");
-                assert(minValue <= maxValue &&
-                       "Invalid range");
-        }
+        explicit RandomGenerator(int32_t seed): rng_(seed) {};
 
-        T GetRandomTypeValue() {
+        T GetRandomTypeValue(BaseType from, BaseType to) {
+                DistributionType distribution(from, to);
                 if constexpr (Core::IsComplexType<T>) {
-                        using ValueType = typename T::value_type;
-                        ValueType real = distribution_(rng_);
-                        ValueType imaginary = distribution_(rng_);
+                        BaseType real = distribution(rng_);
+                        BaseType imaginary = distribution(rng_);
                         return T{real, imaginary};
                 }
-                return distribution_(rng_);
+                return distribution(rng_);
         }
 
         int32_t GetRandomInt(int32_t from, int32_t to) {
@@ -75,23 +62,18 @@ public:
                 return dist(rng_);
         }
 
-        Matrix<T> GetRandomDenseMatrix(Index size) {
-                return GetRandomDenseMatrix(size, size);
-        }
-
-        Matrix<T> GetRandomDenseMatrix(Index row, Index columns) {
+        Matrix<T> GetRandomDenseMatrix(Index row, Index columns,
+                                       BaseType from, BaseType to) {
                 Matrix<T> result(row, columns);
                 result.Elementwise([&](T& value) {
-                        value = GetRandomTypeValue();
+                        value = GetRandomTypeValue(from, to);
                 });
                 return result;
         }
 
-        Matrix<T> GetRandomSparseMatrix(Index size, double density = 0.1) {
-                return GetRandomSparseMatrix(size, size, density);
-        }
-
-        Matrix<T> GetRandomSparseMatrix(Index rows, Index cols, double density = 0.1) {
+        Matrix<T> GetRandomSparseMatrix(Index rows, Index cols,
+                                        BaseType from, BaseType to,
+                                        double density = 0.1) {
                 assert(density >= 0.0 && density <= 1.0 &&
                        "Density must be between 0.0 and 1.0");
                 Matrix<T> result(rows, cols);
@@ -106,7 +88,7 @@ public:
                 for (int32_t i = 0; i < non_zero_elements; ++i) {
                         Index row = static_cast<Index>(GetRandomInt(0, rows - 1));
                         Index col = static_cast<Index>(GetRandomInt(0, cols - 1));
-                        result(row, col) = GetRandomTypeValue();
+                        result(row, col) = GetRandomTypeValue(from, to);
                 }
 
                 return result;
@@ -114,9 +96,6 @@ public:
 
 private:
         std::mt19937 rng_;
-        const int32_t minValue_;
-        const int32_t maxValue_;
-        DistributionType distribution_;
 };
 }//namespace LinAlgTools::Core
 

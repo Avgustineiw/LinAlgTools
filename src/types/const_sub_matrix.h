@@ -135,7 +135,7 @@ public:
                 return result;
         }
 
-        T GetVector2Norm() const {
+        double GetVector2Norm() const {
                 assert(pmatrix_ != nullptr &&
                        "Matrix pointer is null.");
                 assert(Rows() == 1 || Columns() == 1 &&
@@ -143,7 +143,7 @@ public:
                 return Calculate2Norm();
         }
 
-        T GetFrobeniusNorm() const {
+        double GetFrobeniusNorm() const {
                 assert(pmatrix_ != nullptr &&
                        "Matrix pointer is null.");
                 return Calculate2Norm();
@@ -192,18 +192,18 @@ public:
         }
 
 private:
-        const Matrix<T>* pmatrix_;
-        RowSlice rows_;
-        ColumnSlice columns_;
-        bool transposed_ = false;
-
-        T Calculate2Norm() const {
-                T result = T{0};
+        double Calculate2Norm() const {
+                double result = 0.0;
                 Elementwise([&result](const T& value) {
                         result += std::norm(value);
                 });
                 return std::sqrt(result);
         }
+
+        const Matrix<T>* pmatrix_;
+        RowSlice rows_;
+        ColumnSlice columns_;
+        bool transposed_ = false;
 };
 }//namespace LinAlgTools
 

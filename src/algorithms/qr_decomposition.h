@@ -45,7 +45,6 @@ Implementation::PairQR<typename M::ElementType> HessenbergQR(const M& matrix) {
         return {std::move(Q), std::move(R)};
 }
 
-
 template<Core::MatrixType M>
 Implementation::PairQR<typename M::ElementType> HouseholderQR(const M& matrix) {
         using T = typename M::ElementType;
@@ -112,4 +111,3 @@ Implementation::PairQR<typename M::ElementType> GivensQR(const M& matrix) {
         return {std::move(Q), std::move(R)};
 }
 }// namespace LinAlgTools::Algorithm
-

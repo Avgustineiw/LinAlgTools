@@ -2,8 +2,7 @@
 
 #include "../core/indices.h"
 #include "../core/matrix_traits.h"
-#include "../types/matrix.h"
-#include <iostream>
+#include "../core/math_utils.h"
 
 namespace LinAlgTools::Algorithm {
 template<Core::MatrixType M>
