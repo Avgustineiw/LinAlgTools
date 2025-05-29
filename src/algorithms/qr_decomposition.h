@@ -111,3 +111,4 @@ Implementation::PairQR<typename M::ElementType> GivensQR(const M& matrix) {
         return {std::move(Q), std::move(R)};
 }
 }// namespace LinAlgTools::Algorithm
+

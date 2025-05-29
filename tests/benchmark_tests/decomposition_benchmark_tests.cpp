@@ -1,5 +1,4 @@
 #include "benchmark_utils/algorithm_benchmark.h"
-#include "../../src/core/random_generator.h"
 
 #include <gtest/gtest.h>
 
@@ -15,9 +14,10 @@ TEST(TEST_PERFORMANCE_QR, GivensQRPerformance) {
 }
 
 TEST(TEST_PERFORMANCE_SVD, RealSchurPerformance) {
-        RunPerformanceTest<double>(AlgorithmName::RealSchur, 1, 100);
+        RunPerformanceTest<double>(AlgorithmName::RealSchur, 1, 50);
 }
 
 TEST(TEST_PERFORMANCE_SVD, NaiveSVDPerformance) {
         RunPerformanceTest(AlgorithmName::NaiveSVD, 1, 50);
 }
+

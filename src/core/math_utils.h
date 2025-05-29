@@ -150,3 +150,4 @@ bool IsTridiagonal(const M& matrix) {
         return true;
 }
 }// namespace LinAlgTools::Core
+

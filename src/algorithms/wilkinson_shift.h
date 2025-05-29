@@ -23,3 +23,4 @@ typename M::ElementType GetWilkinsonShift(const M& matrix) {
         return (!Core::IsZero(denominator)) ? result : a_nn;
 }
 }//namespace LinAlgTools::Algorithm
+

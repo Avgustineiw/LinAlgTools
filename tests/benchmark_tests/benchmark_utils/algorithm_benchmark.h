@@ -36,28 +36,30 @@ using Clock = std::chrono::high_resolution_clock;
 using Ms = std::chrono::milliseconds;
 namespace Impl = LinAlgTools::Algorithm::Implementation;
 
+template<typename T>
+using BaseType = LinAlgTools::Core::UnderlyingType<T>;
+
 template<typename M>
 using ResultVariant = std::variant<
         Impl::PairQR<typename M::ElementType>,
         Impl::PairSchur<typename M::ElementType>,
         Impl::PairHessenberg<typename M::ElementType>,
-        Impl::TripletSVD<typename M::ElementType>
->;
+        Impl::TripletSVD<typename M::ElementType>>;
 
 template<typename M>
 ResultVariant<M> RunAlgorithm(AlgorithmName algorithm, const M& matrix) {
-    switch (algorithm) {
-        case AlgorithmName::HouseholderQR:
-            return LinAlgTools::Algorithm::HouseholderQR(matrix);
-        case AlgorithmName::GivensQR:
-            return LinAlgTools::Algorithm::GivensQR(matrix);
-        case AlgorithmName::RealSchur:
-            return LinAlgTools::Algorithm::RealSchur(matrix);
-        case AlgorithmName::NaiveSVD:
-            return LinAlgTools::Algorithm::NaiveSVD(matrix);
-        default:
-                assert("Unknown algorithm");
-    }
+        switch (algorithm) {
+                case AlgorithmName::HouseholderQR:
+                        return LinAlgTools::Algorithm::HouseholderQR(matrix);
+                case AlgorithmName::GivensQR:
+                        return LinAlgTools::Algorithm::GivensQR(matrix);
+                case AlgorithmName::RealSchur:
+                        return LinAlgTools::Algorithm::RealSchur(matrix);
+                case AlgorithmName::NaiveSVD:
+                        return LinAlgTools::Algorithm::NaiveSVD(matrix);
+                default:
+                        assert("Unknown algorithm");
+        }
 }
 
 inline TimingResult CalculateStatistics(const std::vector<double>& data) {
@@ -95,8 +97,8 @@ template<typename T = std::complex<long double>>
 TimingResult GetTimingStatistics(AlgorithmName algorithm,
                                  Core::RandomGenerator generator,
                                  int32_t size, int32_t iterations,
-                                 LinAlgTools::Core::UnderlyingType<T> min_value,
-                                 LinAlgTools::Core::UnderlyingType<T> max_value) {
+                                 BaseType<T> min_value,
+                                 BaseType<T> max_value) {
         std::vector<double> data(iterations);
 
         for (int32_t i = 0; i < iterations; i++) {
@@ -137,8 +139,8 @@ void RunPerformanceTest(AlgorithmName algorithm,
                         int32_t min_size = 1, int32_t max_size = 100,
                         int32_t size_step = 1, int32_t matrices_per_iteration = 10,
                         Core::RandomGenerator generator = Core::RandomGenerator(20),
-                        LinAlgTools::Core::UnderlyingType<T> min_value = 1e-10,
-                        LinAlgTools::Core::UnderlyingType<T> max_value = 1e+10) {
+                        Implementation::BaseType<T> min_value = Implementation::BaseType<T>{1e-10},
+                        Implementation::BaseType<T> max_value = Implementation::BaseType<T>{1e+10}) {
         std::string algorithm_name = Implementation::GetNameOfAlgorithm(algorithm);
 
         std::filesystem::path filename = algorithm_name + "_performance.csv";
@@ -155,9 +157,9 @@ void RunPerformanceTest(AlgorithmName algorithm,
         outFile << "Algorithm,Size,Mean(ms),Min(ms),Max (ms),StdDev\n";
 
         for (int32_t size = min_size; size <= max_size; size += size_step) {
-                auto stats = Implementation::GetTimingStatistics(algorithm, generator,
-                                                                 size, matrices_per_iteration,
-                                                                 min_value, max_value);
+                auto stats = Implementation::GetTimingStatistics<T>(algorithm, generator,
+                                                                    size, matrices_per_iteration,
+                                                                    min_value, max_value);
 
                 std::cout << std::setw(10) << size
                           << std::setw(15) << stats.mean

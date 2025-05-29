@@ -212,3 +212,4 @@ TEST(TEST_CONST_SUBMATRIX, MoveOperations) {
         EXPECT_EQ(move_assigned.Rows(), 2);
         EXPECT_EQ(move_assigned(0, 0), 1);
 }
+

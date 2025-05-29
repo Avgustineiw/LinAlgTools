@@ -52,6 +52,7 @@ Implementation::TripletSVD<typename M::ElementType> NaiveSVD(const M& matrix,
                 S = R2.ConjugateTransposed();
                 U *= Q1;
                 VT *= Q2;
+                iteration++;
         } while (!Core::IsDiagonal(S) &&
                  iteration < iterations * matrix.Columns());
 

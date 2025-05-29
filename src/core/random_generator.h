@@ -13,28 +13,30 @@ namespace LinAlgTools::Core {
 class RandomGenerator {
         using Index = Core::Indices::Index;
 
+        template<typename T>
+        using BaseType = LinAlgTools::Core::UnderlyingType<T>;
+
 public:
         explicit RandomGenerator(int32_t seed) : rng_(seed) {};
 
         template<typename T>
-        T GetRandomTypeValue(Core::UnderlyingType<T> min_value,
-                             Core::UnderlyingType<T> max_value) {
-                using BaseType = Core::UnderlyingType<T>;
+        T GetRandomTypeValue(BaseType<T> min_value,
+                             BaseType<T> max_value) {
                 using DistributionType = typename std::conditional<
-                        std::is_integral_v<BaseType>,
+                        std::is_integral_v<BaseType<T>>,
                         std::conditional_t<
                                 IsComplexType<T>,
-                                std::uniform_int_distribution<BaseType>,
+                                std::uniform_int_distribution<BaseType<T>>,
                                 std::uniform_int_distribution<T>>,
                         std::conditional_t<
                                 IsComplexType<T>,
-                                std::uniform_real_distribution<BaseType>,
+                                std::uniform_real_distribution<BaseType<T>>,
                                 std::uniform_real_distribution<T>>>::type;
 
                 DistributionType distribution(min_value, max_value);
                 if constexpr (Core::IsComplexType<T>) {
-                        BaseType real = distribution(rng_);
-                        BaseType imaginary = distribution(rng_);
+                        BaseType<T> real = distribution(rng_);
+                        BaseType<T> imaginary = distribution(rng_);
                         return T{real, imaginary};
                 }
                 return distribution(rng_);
@@ -42,15 +44,15 @@ public:
 
         template<typename T>
         Matrix<T> GetRandomDenseMatrix(Index rows, Index columns,
-                                       Core::UnderlyingType<T> min_value,
-                                       Core::UnderlyingType<T> max_value) {
+                                       BaseType<T> min_value,
+                                       BaseType<T> max_value) {
                 return GetRandomSparseMatrix<T>(rows, columns, min_value, max_value, 1);
         }
 
         template<typename T>
         Matrix<T> GetRandomSparseMatrix(Index rows, Index columns,
-                                        Core::UnderlyingType<T> min_value,
-                                        Core::UnderlyingType<T> max_value,
+                                        BaseType<T> min_value,
+                                        BaseType<T> max_value,
                                         double density = 0.1) {
                 assert(density >= 0.0 && density <= 1.0 &&
                        "Density must be between 0.0 and 1.0");

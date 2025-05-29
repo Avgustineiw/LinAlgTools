@@ -19,7 +19,7 @@ public:
         using ElementType = std::remove_cv_t<T>;
 
         /*
-        * Slicing uses inclusive bounds [first, last], numering from 0
+        * Slicing uses inclusive bounds [first, last], numbering from 0
         * Columns = {0, 1} will include both columns 0 and 1
         */
         ConstSubMatrix(const Matrix<T>& matrix, Slice rows = {0, -1}, Slice columns = {0, -1})
