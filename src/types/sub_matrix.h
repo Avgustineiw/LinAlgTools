@@ -51,7 +51,7 @@ public:
 
         SubMatrix(const SubMatrix& rhs) = default;
 
-        SubMatrix(const ConstSubMatrix<T>& rhs)
+        explicit SubMatrix(const ConstSubMatrix<T>& rhs)
             : pmatrix_(const_cast<Matrix<T>*>(rhs.pmatrix_)),
               rows_(rhs.rows_),
               columns_(rhs.columns_) {
