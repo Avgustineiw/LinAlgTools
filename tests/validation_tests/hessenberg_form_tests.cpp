@@ -13,7 +13,7 @@ using namespace LinAlgTools::Algorithm;
 namespace {
 template<MatrixType M, MatrixType U, MatrixType H>
 bool CheckHessenberg(const M& matrix, const U& unitary, const H& hessenberg) {
-        return AreEqualMatrices(matrix, unitary * hessenberg * unitary.ConjugateTransposed()) &&
+        return AreEqualMatrices(matrix, unitary * hessenberg * ConjugateTransposed(unitary)) &&
                IsUnitary(unitary) &&
                IsUpperHessenberg(hessenberg);
 }

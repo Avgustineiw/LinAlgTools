@@ -23,14 +23,17 @@ class Matrix {
 public:
         using ElementType = std::remove_cv_t<T>;
 
-        explicit Matrix(Index size) : columns_(size), data_(size * size, T{0}) {};
+        explicit Matrix(Index size)
+            : columns_(size), data_(size * size, T{0}) {}
 
-        Matrix(Index rows, Index columns, T value = T{0}) : columns_(columns), data_(rows * columns, value) {
+        Matrix(Index rows, Index columns, T value = T{0})
+            : columns_(columns), data_(rows * columns, value) {
                 assert(rows > 0 && columns > 0 &&
                        "Rows and columns must be positive integers.");
         }
 
-        Matrix(std::initializer_list<std::initializer_list<T>> list) : columns_(list.begin()->size()) {
+        Matrix(std::initializer_list<std::initializer_list<T>> list)
+            : columns_(list.begin()->size()) {
                 for (auto sublist: list) {
                         assert(sublist.size() == columns_ &&
                                "Size of rows must be equal to the number of columns.");
@@ -38,7 +41,10 @@ public:
                 }
         }
 
-        Matrix(const ConstSubMatrix<T>& rhs) : Matrix(rhs.Rows(), rhs.Columns()) {
+        Matrix(const Matrix& rhs) = default;
+
+        Matrix(const SubMatrix<T>& rhs)
+            : Matrix(rhs.Rows(), rhs.Columns()) {
                 for (Index i = 0; i < Rows(); i++) {
                         for (Index j = 0; j < Columns(); j++) {
                                 (*this)(i, j) = rhs(i, j);
@@ -46,9 +52,14 @@ public:
                 }
         }
 
-        Matrix(const SubMatrix<T>& rhs) : Matrix(rhs.ToConstSubMatrix()) {};
-
-        Matrix(const Matrix& rhs) = default;
+        Matrix(const ConstSubMatrix<T>& rhs)
+            : Matrix(rhs.Rows(), rhs.Columns()) {
+                for (Index i = 0; i < Rows(); i++) {
+                        for (Index j = 0; j < Columns(); j++) {
+                                (*this)(i, j) = rhs(i, j);
+                        }
+                }
+        }
 
         Matrix(Matrix&& rhs) noexcept
             : columns_(std::exchange(rhs.columns_, 0)), data_(std::move(rhs.data_)) {
@@ -123,10 +134,6 @@ public:
                 return *this;
         }
 
-        Matrix Transposed() const {
-                return ToSubMatrix().Transposed();
-        }
-
         Matrix& ConjugateTranspose() {
                 if constexpr (Core::IsComplexType<T>) {
                         Elementwise([](T& value) {
@@ -136,11 +143,6 @@ public:
                 Transpose();
                 return *this;
         }
-
-        Matrix ConjugateTransposed() const {
-                return ToSubMatrix().ConjugateTransposed();
-        }
-
 
         template<class Function>
         Matrix& Elementwise(Function function) {
@@ -167,8 +169,8 @@ public:
                 return ToSubMatrix().GetFrobeniusNorm();
         }
 
-        Matrix& Normalize() {
-                ToSubMatrix().Normalize();
+        Matrix& NormalizeVector() {
+                ToSubMatrix().NormalizeVector();
                 return *this;
         }
 
@@ -180,12 +182,22 @@ public:
                 return res;
         }
 
-        T operator()(const Index row_id, const Index column_id) const {
-                return data_[row_id * columns_ + column_id];
+        T operator()(const Index row, const Index column) const {
+                assert(row >= 0 && row < Rows() &&
+                       "Invalid row index");
+                assert(column >= 0 && column < Columns() &&
+                       "Invalid column index");
+
+                return data_[row * columns_ + column];
         }
 
-        T& operator()(const Index row_id, const Index column_id) {
-                return data_[row_id * columns_ + column_id];
+        T& operator()(const Index row, const Index column) {
+                assert(row >= 0 && row < Rows() &&
+                       "Invalid row index");
+                assert(column >= 0 && column < Columns() &&
+                       "Invalid column index");
+
+                return data_[row * columns_ + column];
         }
 
         friend std::ostream& operator<<(std::ostream& os, const Matrix& matrix) {
@@ -399,6 +411,42 @@ bool operator==(const F& lhs, const S& rhs) {
 template<Core::MatrixType F, Core::MatrixType S>
 bool operator!=(const F& lhs, const S& rhs) {
         return !(lhs == rhs);
+}
+
+template<Core::MatrixType M>
+Matrix<typename M::ElementType> Transposed(const M& matrix) {
+        Matrix<typename M::ElementType> result{matrix};
+        result.Transpose();
+        return result;
+}
+
+template<Core::MatrixType M>
+Matrix<typename M::ElementType> ConjugateTransposed(const M& matrix) {
+        Matrix<typename M::ElementType> result{matrix};
+        result.ConjugateTranspose();
+        return result;
+}
+
+template<Core::MutableMatrixType M>
+void SwapColumns(M& matrix, Index first, Index second) {
+        assert(first >= 0 && first < matrix.Columns() &&
+               second >= 0 && second < matrix.Columns() &&
+               "Invalid column index");
+
+        for (Index i = 0; i < matrix.Rows(); i++) {
+                std::swap(matrix(i, first), matrix(i, second));
+        }
+}
+
+template<Core::MutableMatrixType M>
+void SwapRows(M& matrix, Index first, Index second) {
+        assert(first >= 0 && first < matrix.Rows() &&
+               second >= 0 && second < matrix.Rows() &&
+               "Invalid column index");
+
+        for (Index i = 0; i < matrix.Columns(); i++) {
+                std::swap(matrix(first, i), matrix(second, i));
+        }
 }
 }//namespace LinAlgTools
 

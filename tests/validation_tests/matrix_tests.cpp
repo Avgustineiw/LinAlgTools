@@ -73,11 +73,7 @@ TEST(TEST_MATRIX, MatrixOperations) {
         Matrix<double> smallSum = smallA + smallB;
         Matrix<double> expectedSmallSum = {{3e-10, 5e-10},
                                            {7e-10, 9e-10}};
-        for (Index i = 0; i < smallSum.Rows(); ++i) {
-                for (Index j = 0; j < smallSum.Columns(); ++j) {
-                        EXPECT_DOUBLE_EQ(smallSum(i, j), expectedSmallSum(i, j));
-                }
-        }
+        EXPECT_TRUE(Core::AreEqualMatrices(smallSum, expectedSmallSum));
 
         Matrix<std::complex<double>> ca = {{1.0 + 1.0i, 2.0},
                                            {3.0, 4.0 - 1.0i}};
@@ -92,14 +88,14 @@ TEST(TEST_MATRIX, MatrixOperations) {
 TEST(TEST_MATRIX, TransposeOperations) {
         Matrix<double> m1 = {{1, 2},
                              {3, 4}};
-        Matrix<double> transposed1 = m1.Transposed();
+        Matrix<double> transposed1 = Transposed(m1);
         Matrix<double> expected1 = {{1, 3},
                                     {2, 4}};
         EXPECT_EQ(transposed1, expected1);
 
         Matrix<double> m2 = {{1, 2, 3},
                              {4, 5, 6}};
-        Matrix<double> transposed2 = m2.Transposed();
+        Matrix<double> transposed2 = Transposed(m2);
         Matrix<double> expected2 = {{1, 4},
                                     {2, 5},
                                     {3, 6}};
@@ -107,7 +103,7 @@ TEST(TEST_MATRIX, TransposeOperations) {
 
         Matrix<std::complex<double>> m3 = {{1.0 + 2.0i, 3.0 - 1.0i},
                                            {4.0i, -2.0 - 3.0i}};
-        Matrix<std::complex<double>> conjTransposed = m3.ConjugateTransposed();
+        Matrix<std::complex<double>> conjTransposed = ConjugateTransposed(m3);
         Matrix<std::complex<double>> expected3 = {{1.0 - 2.0i, -4.0i},
                                                   {3.0 + 1.0i, -2.0 + 3.0i}};
         EXPECT_EQ(conjTransposed, expected3);
@@ -131,7 +127,7 @@ TEST(TEST_MATRIX, EdgeCases) {
 
         Matrix<double> small = {{1e-10, 2e-10},
                                 {3e-10, 4e-10}};
-        auto smallTransposed = small.Transposed();
+        auto smallTransposed = Transposed(small);
         Matrix<double> expectedSmallTransposed = {{1e-10, 3e-10},
                                                   {2e-10, 4e-10}};
         EXPECT_EQ(smallTransposed, expectedSmallTransposed);
@@ -167,11 +163,7 @@ TEST(TEST_MATRIX, MixedTypeOperations) {
         auto smallResult = smallA * smallB;
         Matrix<double> expectedSmallResult = {{1e-9, 1.3e-9},
                                               {2.2e-9, 2.9e-9}};
-        for (Index i = 0; i < smallResult.Rows(); ++i) {
-                for (Index j = 0; j < smallResult.Columns(); ++j) {
-                        EXPECT_DOUBLE_EQ(smallResult(i, j), expectedSmallResult(i, j));
-                }
-        }
+        EXPECT_TRUE(Core::AreEqualMatrices(smallResult, expectedSmallResult));
 }
 
 TEST(TEST_MATRIX, CopyAndMoveOperations) {
@@ -271,7 +263,7 @@ TEST(TEST_MATRIX, NormAndNormalization) {
         EXPECT_DOUBLE_EQ(norm, std::sqrt(1 + 4 + 9 + 16));
 
         Matrix<double> normalized = m;
-        normalized.Normalize();
+        normalized.NormalizeVector();
         double normalizedNorm = normalized.GetVector2Norm();
         EXPECT_NEAR(normalizedNorm, 1.0, 1e-10);
 }

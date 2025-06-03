@@ -4,6 +4,7 @@
 #include "is_complex.h"
 #include "matrix_traits.h"
 
+#include <algorithm>
 #include <cmath>
 #include <complex>
 #include <cstdlib>
@@ -56,13 +57,13 @@ bool AreEqualMatrices(const F& lhs, const S& rhs) {
 
 template<MatrixType M>
 bool IsOrthogonal(const M& matrix) {
-        return AreEqualMatrices(matrix * matrix.Transposed(),
+        return AreEqualMatrices(matrix * Transposed(matrix),
                                 Matrix<typename M::ElementType>::Identity(matrix.Rows()));
 }
 
 template<MatrixType M>
 bool IsUnitary(const M& matrix) {
-        return AreEqualMatrices(matrix * matrix.ConjugateTransposed(),
+        return AreEqualMatrices(matrix * ConjugateTransposed(matrix),
                                 Matrix<typename M::ElementType>::Identity(matrix.Rows()));
 }
 
@@ -83,8 +84,8 @@ bool IsDiagonal(const M& matrix) {
 
 template<MatrixType M>
 bool IsUpperTriangular(const M& matrix) {
-        for (Index i = 1; i < matrix.Rows(); ++i) {
-                for (Index j = 0; j < i && j < matrix.Columns(); ++j) {
+        for (Index i = 1; i < matrix.Rows(); i++) {
+                for (Index j = 0; j < std::min(i, matrix.Columns()); ++j) {
                         if (!IsZero(matrix(i, j))) {
                                 return false;
                         }
@@ -95,8 +96,8 @@ bool IsUpperTriangular(const M& matrix) {
 
 template<MatrixType M>
 bool IsUpperHessenberg(const M& matrix) {
-        for (Index i = 2; i < matrix.Rows(); ++i) {
-                for (Index j = 0; j < i - 1; ++j) {
+        for (Index i = 2; i < matrix.Rows(); i++) {
+                for (Index j = 0; j < std::min(i - 1, matrix.Columns()); j++) {
                         if (!IsZero(matrix(i, j))) {
                                 return false;
                         }
@@ -109,16 +110,16 @@ template<MatrixType M>
 bool IsBidiagonal(const M& matrix) {
         using Index = typename Core::Indices::Index;
 
-        for (Index i = 2; i < matrix.Rows(); ++i) {
-                for (Index j = 0; j < i - 1; ++j) {
+        for (Index i = 2; i < matrix.Rows(); i++) {
+                for (Index j = 0; j < std::min(i - 1, matrix.Columns()); j++) {
                         if (!IsZero(matrix(i, j))) {
                                 return false;
                         }
                 }
         }
 
-        for (Index j = 2; j < matrix.Columns(); ++j) {
-                for (Index i = 0; i < j - 1; ++i) {
+        for (Index j = 2; j < matrix.Columns(); j++) {
+                for (Index i = 0; i < std::min(j - 1, matrix.Rows()); i++) {
                         if (!IsZero(matrix(i, j))) {
                                 return false;
                         }
@@ -132,15 +133,15 @@ template<MatrixType M>
 bool IsTridiagonal(const M& matrix) {
         using Index = typename Core::Indices::Index;
 
-        for (Index i = 2; i < matrix.Rows(); ++i) {
-                for (Index j = 0; j < i - 1; ++j) {
+        for (Index i = 2; i < matrix.Rows(); i++) {
+                for (Index j = 0; j < std::min(i - 1, matrix.Columns()); j++) {
                         if (!IsZero(matrix(i, j))) {
                                 return false;
                         }
                 }
         }
-        for (Index j = 2; j < matrix.Columns(); ++j) {
-                for (Index i = 0; i < j - 1; ++i) {
+        for (Index j = 2; j < matrix.Columns(); j++) {
+                for (Index i = 0; i < std::min(j - 1, matrix.Rows()); i++) {
                         if (!IsZero(matrix(i, j))) {
                                 return false;
                         }

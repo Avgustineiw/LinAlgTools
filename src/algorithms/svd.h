@@ -2,7 +2,6 @@
 
 #include "../core/indices.h"
 #include "../core/matrix_traits.h"
-#include "../core/matrix_utils.h"
 #include "../types/matrix.h"
 #include "bidiagonalization.h"
 #include "qr_decomposition.h"
@@ -29,8 +28,8 @@ void SortSingularValues(M& U, M& S, M& VT) {
                         if (std::real(S(j, j)) >= std::real(S(j + 1, j + 1))) continue;
 
                         std::swap(S(j, j), S(j + 1, j + 1));
-                        Core::SwapColumns(U, j, j + 1);
-                        Core::SwapRows(VT, j, j + 1);
+                        SwapColumns(U, j, j + 1);
+                        SwapRows(VT, j, j + 1);
                 }
         }
 }
@@ -48,8 +47,8 @@ Implementation::TripletSVD<typename M::ElementType> NaiveSVD(const M& matrix,
 
         do {
                 auto [Q1, R1] = HouseholderQR(S);
-                auto [Q2, R2] = HouseholderQR(R1.ConjugateTransposed());
-                S = R2.ConjugateTransposed();
+                auto [Q2, R2] = HouseholderQR(ConjugateTransposed(R1));
+                S = ConjugateTransposed(R2);
                 U *= Q1;
                 VT *= Q2;
                 iteration++;

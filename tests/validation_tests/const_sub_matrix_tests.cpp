@@ -139,7 +139,7 @@ TEST(TEST_CONST_SUBMATRIX, TransposeOperations) {
                               {4, 5, 6}};
         ConstSubMatrix<double> sub(mat);
 
-        auto transposed = sub.Transposed();
+        auto transposed = Transposed(sub);
         Matrix<double> expected = {{1, 4},
                                    {2, 5},
                                    {3, 6}};
@@ -148,7 +148,7 @@ TEST(TEST_CONST_SUBMATRIX, TransposeOperations) {
         Matrix<std::complex<double>> cmat = {{1.0 + 1.0i, 2.0 + 2.0i},
                                              {3.0 + 3.0i, 4.0 + 4.0i}};
         ConstSubMatrix<std::complex<double>> csub(cmat);
-        auto conj_transposed = csub.ConjugateTransposed();
+        auto conj_transposed = ConjugateTransposed(csub);
         Matrix<std::complex<double>> expected_ct = {{1.0 - 1.0i, 3.0 - 3.0i},
                                                     {2.0 - 2.0i, 4.0 - 4.0i}};
         EXPECT_EQ(conj_transposed, expected_ct);

@@ -105,11 +105,7 @@ TEST(TEST_SUBMATRIX, InPlaceOperations) {
         small_sub += small_add;
         Matrix<double> small_expected = {{2e-10, 4e-10},
                                          {6e-10, 8e-10}};
-        for (int i = 0; i < 2; i++) {
-                for (int j = 0; j < 2; j++) {
-                        EXPECT_DOUBLE_EQ(small_mat(i, j), small_expected(i, j));
-                }
-        }
+        EXPECT_TRUE(Core::AreEqualMatrices(small_mat, small_expected));
 }
 
 TEST(TEST_SUBMATRIX, Transpose) {
@@ -152,11 +148,7 @@ TEST(TEST_SUBMATRIX, ElementwiseOperations) {
                                     {3e-10, 4e-10}};
         SubMatrix<double> small_sub(small_mat);
         small_sub.Elementwise([](double& x) { x *= 2; });
-        for (int i = 0; i < 2; i++) {
-                for (int j = 0; j < 2; j++) {
-                        EXPECT_DOUBLE_EQ(small_mat(i, j), mat(i, j) * 1e-10);
-                }
-        }
+        EXPECT_TRUE(Core::AreEqualMatrices(small_mat, expected * 1e-10));
 }
 
 TEST(TEST_SUBMATRIX, EdgeCases) {
@@ -183,11 +175,9 @@ TEST(TEST_SUBMATRIX, EdgeCases) {
                                 {3e-10, 4e-10}};
         SubMatrix<double> sub_small(small);
         sub_small.RemoveZeros();
-        for (int i = 0; i < 2; i++) {
-                for (int j = 0; j < 2; j++) {
-                        EXPECT_GT(std::abs(small(i, j)), 0.0);
-                }
-        }
+        Matrix<double> zero_matrix = {{0, 0},
+                                      {0, 0}};
+        EXPECT_TRUE(!Core::AreEqualMatrices(small, zero_matrix));
 }
 
 TEST(TEST_SUBMATRIX, MoveOperations) {

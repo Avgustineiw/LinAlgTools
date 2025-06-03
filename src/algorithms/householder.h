@@ -21,7 +21,7 @@ Matrix<typename M::ElementType> HouseholderVectorReduction(const M& vector) {
         else {
                 result(0, 0) -= Core::sign(vector(0, 0)) * vector.GetVector2Norm();
         }
-        result.Normalize();
+        result.NormalizeVector();
         return {std::move(result)};
 }
 
@@ -29,14 +29,14 @@ template<Core::MutableMatrixType F, Core::MatrixType S>
 void HouseholderLeftRotation(F& matrix, const S& vector) {
         using T = typename F::ElementType;
         Matrix<T> reduced_vector = HouseholderVectorReduction(vector);
-        matrix -= (T{2} * reduced_vector) * (reduced_vector.ConjugateTransposed() * matrix);
+        matrix -= (T{2} * reduced_vector) * (ConjugateTransposed(reduced_vector) * matrix);
 }
 
 template<Core::MutableMatrixType F, Core::MatrixType S>
 void HouseholderRightRotation(F& matrix, const S& vector) {
         using T = typename F::ElementType;
         Matrix<T> reduced_vector = HouseholderVectorReduction(vector);
-        matrix -= (matrix * reduced_vector.ConjugateTransposed()) * (T{2} * reduced_vector);
+        matrix -= (matrix * ConjugateTransposed(reduced_vector)) * (T{2} * reduced_vector);
 }
 }//namespace LinAlgTools::Algorithm
 

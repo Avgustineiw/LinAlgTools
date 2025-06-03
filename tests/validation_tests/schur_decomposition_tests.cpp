@@ -12,7 +12,7 @@ using namespace LinAlgTools::Algorithm;
 namespace {
 template<MatrixType M, MatrixType U, MatrixType S>
 bool CheckSchur(const M& matrix, const U& unitary, const S& schur) {
-        return AreEqualMatrices(matrix, unitary * schur * unitary.ConjugateTransposed()) &&
+        return AreEqualMatrices(matrix, unitary * schur * ConjugateTransposed(unitary)) &&
                IsUnitary(unitary) &&
                IsUpperTriangular(schur);
 }

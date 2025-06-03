@@ -7,10 +7,15 @@
 namespace LinAlgTools::Algorithm {
 template<Core::MatrixType M>
 typename M::ElementType GetWilkinsonShift(const M& matrix) {
+        if (matrix.Rows() == 1 ||
+            matrix.Columns() == 1) {
+                return 0;
+        }
+
         using T = typename M::ElementType;
         using Index = Core::Indices::Index;
 
-        Index n = matrix.Rows();
+        Index n = matrix.Rows() - 1;
         Index m = n - 1;
         T a_mm = matrix(m, m);
         T a_mn = matrix(m, n);

@@ -12,6 +12,7 @@
 namespace LinAlgTools {
 template<typename T>
 class ConstSubMatrix {
+        friend class LinAlgTools::SubMatrix<T>;
         using Index = Core::Indices::Index;
         using Slice = Core::Indices::Slice;
 
@@ -21,6 +22,8 @@ public:
         /*
         * Slicing uses inclusive bounds [first, last], numbering from 0
         * Columns = {0, 1} will include both columns 0 and 1
+        * -1 in the second slot indicates the amount of rows or columns
+        * Rows = {0, -1} will get all rows of the matrix
         */
         ConstSubMatrix(const Matrix<T>& matrix, Slice rows = {0, -1}, Slice columns = {0, -1})
             : pmatrix_(&matrix),
@@ -56,7 +59,7 @@ public:
         ConstSubMatrix(ConstSubMatrix&& rhs) noexcept
             : pmatrix_(std::exchange(rhs.pmatrix_, nullptr)),
               rows_(std::exchange(rhs.rows_, {0, -1})),
-              columns_(std::exchange(rhs.columns_, {0, -1})) {};
+              columns_(std::exchange(rhs.columns_, {0, -1})) {}
 
         ConstSubMatrix(Matrix<T>&& rhs) = delete;
 
@@ -165,27 +168,14 @@ public:
                 return Calculate2Norm();
         }
 
-        Matrix<T> Transposed() const {
-                assert(pmatrix_ != nullptr &&
-                       "Matrix pointer is null.");
-
-                Matrix<T> result{*this};
-                result.Transpose();
-                return result;
-        }
-
-        Matrix<T> ConjugateTransposed() const {
-                assert(pmatrix_ != nullptr &&
-                       "Matrix pointer is null.");
-
-                Matrix<T> result{*this};
-                result.ConjugateTranspose();
-                return result;
-        }
-
         T operator()(Index row, Index column) const {
                 assert(pmatrix_ != nullptr &&
                        "Matrix pointer is null.");
+                assert(row >= 0 && row < Rows() &&
+                       "Invalid row index");
+                assert(column >= 0 && column < Columns() &&
+                       "Invalid column index");
+
                 return (*pmatrix_)(rows_.first + row, columns_.first + column);
         }
 

@@ -15,6 +15,7 @@
 namespace LinAlgTools {
 template<typename T>
 class SubMatrix {
+        friend class LinAlgTools::ConstSubMatrix<T>;
         using Index = Core::Indices::Index;
         using Slice = Core::Indices::Slice;
 
@@ -24,6 +25,8 @@ public:
         /*
         * Slicing uses inclusive bounds [first, last], numbering from 0
         * Columns = {0, 1} will include both columns 0 and 1
+        * -1 in the second slot indicates the amount of rows or columns
+        * Rows = {0, -1} will get all rows of the matrix
         */
         SubMatrix(Matrix<T>& matrix, Slice rows = {0, -1}, Slice columns = {0, -1})
             : pmatrix_(&matrix),
@@ -48,26 +51,36 @@ public:
 
         SubMatrix(const SubMatrix& rhs) = default;
 
+        SubMatrix(const ConstSubMatrix<T>& rhs)
+            : pmatrix_(const_cast<Matrix<T>*>(rhs.pmatrix_)),
+              rows_(rhs.rows_),
+              columns_(rhs.columns_) {
+                assert(rhs.pmatrix_ != nullptr &&
+                       "Matrix pointer is null");
+        }
+
         SubMatrix(SubMatrix&& rhs) noexcept
             : pmatrix_(std::exchange(rhs.pmatrix_, nullptr)),
               rows_(std::exchange(rhs.rows_, {0, -1})),
-              columns_(std::exchange(rhs.columns_, {0, -1})) {};
+              columns_(std::exchange(rhs.columns_, {0, -1})) {}
 
         SubMatrix(Matrix<T>&& rhs) = delete;
 
-        SubMatrix& operator=(const SubMatrix& lhs) = default;
+        ConstSubMatrix<T> ToConstSubMatrix() const {
+                return {*pmatrix_,
+                        {rows_.first, rows_.last},
+                        {columns_.first, columns_.last}};
+        }
+
+        ConstSubMatrix<T> ToConstSubMatrix() && = delete;
+
+        SubMatrix& operator=(const SubMatrix&) = default;
 
         SubMatrix& operator=(SubMatrix&& rhs) noexcept {
                 pmatrix_ = std::exchange(rhs.pmatrix_, nullptr);
                 rows_ = std::exchange(rhs.rows_, {0, -1});
                 columns_ = std::exchange(rhs.columns_, {0, -1});
                 return *this;
-        }
-
-        ConstSubMatrix<T> ToConstSubMatrix() const {
-                return ConstSubMatrix<T>(*pmatrix_,
-                                         {rows_.first, rows_.last},
-                                         {columns_.first, columns_.last});
         }
 
         SubMatrix GetSubMatrix(Slice rows, Slice columns) {
@@ -134,7 +147,7 @@ public:
         }
 
 
-        SubMatrix& Normalize() {
+        SubMatrix& NormalizeVector() {
                 assert(pmatrix_ != nullptr &&
                        "Matrix pointer is null.");
 
@@ -149,19 +162,10 @@ public:
         SubMatrix& Transpose() {
                 assert(pmatrix_ != nullptr &&
                        "Matrix pointer is null.");
-                Matrix<T> temp = this->Transposed();
-                *pmatrix_ = std::move(temp);
+                Matrix<T> temp = *this;
+                *pmatrix_ = std::move(Transposed(temp));
                 std::swap(rows_, columns_);
                 return *this;
-        }
-
-        Matrix<T> Transposed() const {
-                assert(pmatrix_ != nullptr &&
-                       "Matrix pointer is null.");
-
-                Matrix<T> result{*this};
-                result.Transpose();
-                return result;
         }
 
         SubMatrix& ConjugateTranspose() {
@@ -175,20 +179,6 @@ public:
                 }
                 return (*this).Transpose();
         }
-
-        Matrix<T> ConjugateTransposed() const {
-                assert(pmatrix_ != nullptr &&
-                       "Matrix pointer is null.");
-                Matrix<T> result{*this};
-                if constexpr (Core::IsComplexType<T>) {
-                        result.Elementwise([](T& value) {
-                                value = std::conj(value);
-                        });
-                }
-                result.Transpose();
-                return *this;
-        }
-
 
         template<class Function>
         SubMatrix& Elementwise(Function function) {
@@ -223,6 +213,10 @@ public:
         T operator()(Index row, Index column) const {
                 assert(pmatrix_ != nullptr &&
                        "Matrix pointer is null.");
+                assert(row >= 0 && row < Rows() &&
+                       "Invalid row index");
+                assert(column >= 0 && column < Columns() &&
+                       "Invalid column index");
 
                 return (*pmatrix_)(rows_.first + row, columns_.first + column);
         }
@@ -230,12 +224,13 @@ public:
         T& operator()(const Index row, const Index column) {
                 assert(pmatrix_ != nullptr &&
                        "Matrix pointer is null.");
+                assert(row >= 0 && row < Rows() &&
+                       "Invalid row index");
+                assert(column >= 0 && column < Columns() &&
+                       "Invalid column index");
 
                 return (*pmatrix_)(rows_.first + row, columns_.first + column);
         }
-
-        template<typename F>
-        friend class LinAlgTools::ConstSubMatrix;
 
         friend std::ostream& operator<<(std::ostream& os, const SubMatrix& matrix) {
                 for (Index i = 0; i < matrix.Rows(); i++) {

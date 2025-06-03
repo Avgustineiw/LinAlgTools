@@ -6,6 +6,7 @@
 #include "../../../src/core/is_complex.h"
 #include "../../../src/core/random_generator.h"
 
+#include <any>
 #include <cassert>
 #include <chrono>
 #include <complex>
@@ -14,7 +15,7 @@
 #include <gtest/gtest.h>
 
 namespace LinAlgTools::Tests::Utils {
-enum class AlgorithmName
+enum class AlgorithmId
 {
         HouseholderQR,
         GivensQR,
@@ -40,22 +41,15 @@ template<typename T>
 using BaseType = LinAlgTools::Core::UnderlyingType<T>;
 
 template<typename M>
-using ResultVariant = std::variant<
-        Impl::PairQR<typename M::ElementType>,
-        Impl::PairSchur<typename M::ElementType>,
-        Impl::PairHessenberg<typename M::ElementType>,
-        Impl::TripletSVD<typename M::ElementType>>;
-
-template<typename M>
-ResultVariant<M> RunAlgorithm(AlgorithmName algorithm, const M& matrix) {
+std::any RunAlgorithm(AlgorithmId algorithm, const M& matrix) {
         switch (algorithm) {
-                case AlgorithmName::HouseholderQR:
+                case AlgorithmId::HouseholderQR:
                         return LinAlgTools::Algorithm::HouseholderQR(matrix);
-                case AlgorithmName::GivensQR:
+                case AlgorithmId::GivensQR:
                         return LinAlgTools::Algorithm::GivensQR(matrix);
-                case AlgorithmName::RealSchur:
+                case AlgorithmId::RealSchur:
                         return LinAlgTools::Algorithm::RealSchur(matrix);
-                case AlgorithmName::NaiveSVD:
+                case AlgorithmId::NaiveSVD:
                         return LinAlgTools::Algorithm::NaiveSVD(matrix);
                 default:
                         assert("Unknown algorithm");
@@ -94,7 +88,7 @@ inline TimingResult CalculateStatistics(const std::vector<double>& data) {
 }
 
 template<typename T = std::complex<long double>>
-TimingResult GetTimingStatistics(AlgorithmName algorithm,
+TimingResult GetTimingStatistics(AlgorithmId algorithm,
                                  Core::RandomGenerator generator,
                                  int32_t size, int32_t iterations,
                                  BaseType<T> min_value,
@@ -114,18 +108,18 @@ TimingResult GetTimingStatistics(AlgorithmName algorithm,
         return CalculateStatistics(data);
 }
 
-inline std::string GetNameOfAlgorithm(AlgorithmName algorithm) {
+inline std::string GetNameOfAlgorithm(AlgorithmId algorithm) {
         switch (algorithm) {
-                case AlgorithmName::HouseholderQR:
+                case AlgorithmId::HouseholderQR:
                         return "HouseholderQR";
                         break;
-                case AlgorithmName::GivensQR:
+                case AlgorithmId::GivensQR:
                         return "GivensQR";
                         break;
-                case AlgorithmName::RealSchur:
+                case AlgorithmId::RealSchur:
                         return "RealSchur";
                         break;
-                case AlgorithmName::NaiveSVD:
+                case AlgorithmId::NaiveSVD:
                         return "NaiveSVD";
                         break;
                 default:
@@ -151,7 +145,7 @@ inline std::ostream& operator<<(std::ostream& os, const TimingResult& stats) {
 }//namespace Implementation
 
 template<typename T = std::complex<long double>>
-void RunPerformanceTest(AlgorithmName algorithm,
+void RunPerformanceTest(AlgorithmId algorithm,
                         int32_t min_size = 1, int32_t max_size = 100,
                         int32_t size_step = 1, int32_t matrices_per_iteration = 10,
                         Core::RandomGenerator generator = Core::RandomGenerator(20),
