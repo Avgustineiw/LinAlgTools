@@ -132,6 +132,22 @@ inline std::string GetNameOfAlgorithm(AlgorithmName algorithm) {
                         assert("Unknown algorithm");
         }
 }
+
+inline std::ostream& operator<<(std::ostream& os, const TimingResult& stats) {
+        if (&os == &std::cout) {
+                os << stats.mean
+                   << std::setw(15) << stats.min
+                   << std::setw(15) << stats.max
+                   << std::setw(15) << std::fixed << std::setprecision(2) << stats.stddev;
+        }
+        else {
+                os << stats.mean << ","
+                   << stats.min << ","
+                   << stats.max << ","
+                   << std::fixed << std::setprecision(6) << stats.stddev;
+        }
+        return os;
+}
 }//namespace Implementation
 
 template<typename T = std::complex<long double>>
@@ -160,21 +176,12 @@ void RunPerformanceTest(AlgorithmName algorithm,
                 auto stats = Implementation::GetTimingStatistics<T>(algorithm, generator,
                                                                     size, matrices_per_iteration,
                                                                     min_value, max_value);
-
                 std::cout << std::setw(10) << size
-                          << std::setw(15) << stats.mean
-                          << std::setw(15) << stats.min
-                          << std::setw(15) << stats.max
-                          << std::setw(15) << std::fixed << std::setprecision(2)
-                          << stats.stddev << '\n';
+                          << std::setw(15) << stats << '\n';
 
                 outFile << algorithm_name << ","
                         << size << ","
-                        << stats.mean << ","
-                        << stats.min << ","
-                        << stats.max << ","
-                        << std::fixed << std::setprecision(6)
-                        << stats.stddev << '\n';
+                        << stats << '\n';
         }
 
         std::cout << "\nResults saved to: " << filename << '\n';
