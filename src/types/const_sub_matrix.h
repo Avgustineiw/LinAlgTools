@@ -12,7 +12,6 @@
 namespace LinAlgTools {
 template<typename T>
 class ConstSubMatrix {
-        friend class LinAlgTools::SubMatrix<T>;
         using Index = Core::Indices::Index;
         using Slice = Core::Indices::Slice;
 

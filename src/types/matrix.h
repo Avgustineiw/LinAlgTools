@@ -43,14 +43,7 @@ public:
 
         Matrix(const Matrix& rhs) = default;
 
-        Matrix(const SubMatrix<T>& rhs)
-            : Matrix(rhs.Rows(), rhs.Columns()) {
-                for (Index i = 0; i < Rows(); i++) {
-                        for (Index j = 0; j < Columns(); j++) {
-                                (*this)(i, j) = rhs(i, j);
-                        }
-                }
-        }
+        Matrix(const SubMatrix<T>& rhs): Matrix(rhs.ToConstSubMatrix()) {}
 
         Matrix(const ConstSubMatrix<T>& rhs)
             : Matrix(rhs.Rows(), rhs.Columns()) {
@@ -77,7 +70,7 @@ public:
                 return SubMatrix<T>(*this);
         }
 
-        ConstSubMatrix<T> ToSubMatrix() const {
+        ConstSubMatrix<T> ToConstSubMatrix() const {
                 return ConstSubMatrix<T>(*this);
         }
 
@@ -86,8 +79,8 @@ public:
                                                   {columns.first, columns.last});
         }
 
-        ConstSubMatrix<T> GetSubMatrix(Slice rows, Slice columns) const {
-                return ToSubMatrix().GetSubMatrix({rows.first, rows.last},
+        ConstSubMatrix<T> GetConstSubMatrix(Slice rows, Slice columns) const {
+                return ToConstSubMatrix().GetSubMatrix({rows.first, rows.last},
                                                   {columns.first, columns.last});
         }
 
@@ -104,7 +97,7 @@ public:
         }
 
         ConstSubMatrix<T> GetRow(Index row) const {
-                return ToSubMatrix().GetRow(row);
+                return ToConstSubMatrix().GetRow(row);
         }
 
         SubMatrix<T> GetColumn(Index column) {
@@ -112,15 +105,15 @@ public:
         }
 
         ConstSubMatrix<T> GetColumn(Index column) const {
-                return ToSubMatrix().GetColumn(column);
+                return ToConstSubMatrix().GetColumn(column);
         }
 
         Matrix Diagonal() const {
-                return ToSubMatrix().Diagonal();
+                return ToConstSubMatrix().Diagonal();
         }
 
         T Trace() const {
-                return ToSubMatrix().Trace();
+                return ToConstSubMatrix().Trace();
         }
 
         Matrix& Transpose() {
@@ -152,7 +145,7 @@ public:
 
         template<class Function>
         const Matrix& Elementwise(Function function) const {
-                ToSubMatrix().Elementwise(function);
+                ToConstSubMatrix().Elementwise(function);
                 return *this;
         }
 
@@ -162,11 +155,11 @@ public:
         }
 
         double GetVector2Norm() const {
-                return ToSubMatrix().GetVector2Norm();
+                return ToConstSubMatrix().GetVector2Norm();
         }
 
         double GetFrobeniusNorm() const {
-                return ToSubMatrix().GetFrobeniusNorm();
+                return ToConstSubMatrix().GetFrobeniusNorm();
         }
 
         Matrix& NormalizeVector() {

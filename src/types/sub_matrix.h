@@ -20,6 +20,7 @@ class SubMatrix {
         using Slice = Core::Indices::Slice;
 
 public:
+
         using ElementType = std::remove_cv_t<T>;
 
         /*
@@ -50,14 +51,6 @@ public:
         }
 
         SubMatrix(const SubMatrix& rhs) = default;
-
-        explicit SubMatrix(const ConstSubMatrix<T>& rhs)
-            : pmatrix_(const_cast<Matrix<T>*>(rhs.pmatrix_)),
-              rows_(rhs.rows_),
-              columns_(rhs.columns_) {
-                assert(rhs.pmatrix_ != nullptr &&
-                       "Matrix pointer is null");
-        }
 
         SubMatrix(SubMatrix&& rhs) noexcept
             : pmatrix_(std::exchange(rhs.pmatrix_, nullptr)),
@@ -92,10 +85,25 @@ public:
                        columns_.first + columns.last <= Columns() &&
                        "Slice must be inside the matrix.");
 
-                return SubMatrix(*pmatrix_,
-                                 {rows_.first + rows.first, rows_.first + rows.last},
-                                 {columns_.first + columns.first, columns_.first + columns.last});
+                return {*pmatrix_,
+                        {rows_.first + rows.first, rows_.first + rows.last},
+                        {columns_.first + columns.first, columns_.first + columns.last}};
         }
+
+        ConstSubMatrix<T> GetConstSubMatrix(Slice rows, Slice columns) {
+                assert(pmatrix_ != nullptr &&
+                       "Matrix pointer is null.");
+                assert(rows_.first + rows.first < Rows() &&
+                       rows_.first + rows.last <= Rows() &&
+                       columns_.first + columns.first < Columns() &&
+                       columns_.first + columns.last <= Columns() &&
+                       "Slice must be inside the matrix.");
+
+                return {*pmatrix_,
+                        {rows_.first + rows.first, rows_.first + rows.last},
+                        {columns_.first + columns.first, columns_.first + columns.last}};
+        }
+
 
         Index Rows() const {
                 assert(pmatrix_ != nullptr &&
@@ -256,4 +264,3 @@ private:
         Slice columns_;
 };
 }// namespace LinAlgTools
-
