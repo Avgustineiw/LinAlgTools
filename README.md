@@ -86,7 +86,9 @@ cd build
 ```
 
 ## About the project
-Developed as a course project for the 2nd year of the Bachelor's program in Data Science and Business Analytics at HSE University (2025). Author: Zinkin Zakhar, 2nd year student.
+Developed as a course project for the 2nd year of the Bachelor's program in Data Science and Business Analytics at HSE University (2025). 
+
+Author: Zinkin Zakhar, 2nd year student.
 
 ## License
 
