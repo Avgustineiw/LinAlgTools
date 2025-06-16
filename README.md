@@ -4,6 +4,12 @@
 - **Educational value**: Well-documented theoretical and technical parts (see the [report](https://github.com/Avgustineiw/LinAlgTools/blob/dev/CP_Report.pdf))
 - **Practical usability**: Implementation of numerically stable algorithms, utilizing modern C++ features
 
+## Quick Start
+```bash
+# Clone and include headers in your project
+git clone https://github.com/Avgustineiw/LinAlgTools.git
+```
+
 ## Key Features
 
 ### Core Components
@@ -80,4 +86,8 @@ cd build
 ```
 
 ## About the project
-Developed as part of the curriculum for the Bachelor's program in Data Science and Business Analytics at HSE University (2025). Author: Zinkin Zakhar, 2nd year student.
+Developed as a course project for the 2nd year of the Bachelor's program in Data Science and Business Analytics at HSE University (2025). Author: Zinkin Zakhar, 2nd year student.
+
+## License
+
+MIT License (see [LICENSE](https://github.com/Avgustineiw/LinAlgTools/blob/dev/LICENSE))
